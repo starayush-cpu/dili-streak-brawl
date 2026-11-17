@@ -1,0 +1,1275 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+<meta name="color-scheme" content="dark" />
+<link rel="icon" href="data:," />
+<title>Dili Streak Brawl</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; background: #0b0e1a; color: #f4f1e8;
+    font-family: "Trebuchet MS", "Segoe UI", "Nirmala UI", Verdana, system-ui, sans-serif;
+    overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none;
+  }
+  #wrap {
+    position: fixed; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 8px;
+    background: radial-gradient(1200px 600px at 50% -10%, #1c2447 0%, #0b0e1a 60%);
+    padding: env(safe-area-inset-top) 8px env(safe-area-inset-bottom);
+  }
+  #stage {
+    position: relative; width: min(100%, calc((100dvh - 64px) * 16 / 9));
+    aspect-ratio: 16 / 9; max-height: calc(100dvh - 64px);
+  }
+  canvas {
+    width: 100%; height: 100%; display: block; border-radius: 10px; outline: none;
+    box-shadow: 0 18px 50px rgba(0,0,0,.55), 0 0 0 3px #232a4d, 0 0 0 6px #0e1230;
+    background: #10142b; image-rendering: pixelated;
+  }
+  /* ---------- overlays ---------- */
+  .screen {
+    position: absolute; inset: 0; border-radius: 10px; z-index: 5;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 18px; gap: 10px;
+  }
+  .hidden { display: none !important; }
+  #titleScreen { background: linear-gradient(180deg, rgba(10,12,28,.25), rgba(10,12,28,.82) 78%); }
+  #titleScreen h1 {
+    margin: 0; font-size: clamp(30px, 6.2vw, 58px); line-height: .95; letter-spacing: 1px;
+    font-weight: 900; color: #ffd23e; text-shadow: 0 3px 0 #e2543e, 0 6px 0 #7a1f3d, 0 10px 22px rgba(0,0,0,.6);
+    transform: rotate(-2deg);
+  }
+  #titleScreen h1 .brawl { color: #3ee6c4; text-shadow: 0 3px 0 #1d7f74, 0 6px 0 #0d3d4d, 0 10px 22px rgba(0,0,0,.6); }
+  .tagline { margin: 0; font-size: clamp(13px, 2.2vw, 17px); color: #ffe9b0; font-weight: 700; }
+  .sub { margin: 0; max-width: 560px; font-size: clamp(12px, 2vw, 15px); color: #cfd6ff; line-height: 1.45; }
+  .bigbtn {
+    border: 0; cursor: pointer; min-height: 52px; padding: 12px 34px; border-radius: 12px;
+    font: inherit; font-weight: 900; font-size: clamp(17px, 2.6vw, 21px); letter-spacing: .5px;
+    color: #231303; background: linear-gradient(180deg, #ffd23e, #ff9d2e);
+    box-shadow: 0 5px 0 #b95d12, 0 10px 24px rgba(0,0,0,.45);
+  }
+  .bigbtn:active { transform: translateY(3px); box-shadow: 0 2px 0 #b95d12; }
+  .ghostbtn {
+    border: 2px solid #4a5590; cursor: pointer; min-height: 44px; padding: 8px 20px; border-radius: 10px;
+    font: inherit; font-weight: 700; font-size: 15px; color: #dfe5ff; background: rgba(20,26,54,.75);
+  }
+  .keys {
+    display: flex; flex-wrap: wrap; gap: 6px 14px; justify-content: center;
+    font-size: 12.5px; color: #aab4e8; max-width: 640px;
+  }
+  .keys b { color: #fff; background: #232a4d; border: 1px solid #4a5590; border-bottom-width: 3px;
+    border-radius: 6px; padding: 1px 7px; font-size: 12px; }
+  #endScreen { background: rgba(8,10,24,.78); }
+  #endScreen h2 { margin: 0; font-size: clamp(26px, 5vw, 44px); color: #ffd23e; text-shadow: 0 3px 0 #7a1f3d; }
+  #endStats { font-size: clamp(14px, 2.4vw, 18px); line-height: 1.7; color: #e8ecff; }
+  #endStats b { color: #3ee6c4; }
+  .quip { font-style: italic; color: #ffb3c8; font-size: clamp(13px, 2.2vw, 16px); max-width: 520px; }
+  /* ---------- top bar ---------- */
+  #topbar {
+    width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  }
+  #topbar .name { font-weight: 900; letter-spacing: 1px; font-size: 14px; color: #ffd23e; }
+  #topbar .name span { color: #3ee6c4; }
+  .iconbtn {
+    border: 2px solid #39437a; background: #161c3a; color: #e8ecff; border-radius: 9px;
+    min-width: 44px; min-height: 40px; font: inherit; font-weight: 800; font-size: 14px; cursor: pointer; padding: 6px 12px;
+  }
+  /* ---------- touch controls ---------- */
+  #touch {
+    position: absolute; inset: auto 0 0 0; z-index: 4; display: none; width: 100%;
+    justify-content: space-between; align-items: flex-end; padding: 0 10px 12px; pointer-events: none;
+  }
+  #touch .cluster { display: flex; gap: 10px; pointer-events: none; }
+  .tbtn {
+    pointer-events: auto; width: 60px; height: 60px; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,.35); background: rgba(14,18,40,.55); color: #fff;
+    font-size: 22px; font-weight: 900; display: flex; align-items: center; justify-content: center;
+    touch-action: none;
+  }
+  .tbtn.on { background: rgba(255,210,62,.75); color: #231303; }
+  .tbtn.fire { width: 72px; height: 72px; background: rgba(226,84,62,.55); }
+  .tbtn.fire.on { background: rgba(255,210,62,.85); }
+  .tbtn.jump { flex-direction: column; gap: 1px; line-height: 1; }
+  .tbtn.jump .sym { font-size: 20px; line-height: 1; }
+  .tbtn.jump .lbl { font-size: 11px; letter-spacing: 1.5px; line-height: 1; }
+  body.touch #touch { display: flex; }
+  #errCard {
+    position: absolute; inset: 0; z-index: 9; display: none; align-items: center; justify-content: center;
+    background: rgba(8,10,24,.92); border-radius: 10px; text-align: center; padding: 20px;
+  }
+  /* ---------- brand / logo ---------- */
+  .brand { display: flex; align-items: center; gap: 9px; min-width: 0; }
+  .brand svg { flex: 0 0 auto; filter: drop-shadow(0 2px 6px rgba(47,123,255,.55)); }
+  .brand .dlicom { font-weight: 900; letter-spacing: 2.5px; font-size: 15px; color: #ffffff; line-height: 1; }
+  .brand .dlicom small { display: block; letter-spacing: 1px; font-size: 10.5px; color: #8fb8ff; font-weight: 800; margin-top: 3px; }
+  .logo-lockup { display: flex; align-items: center; gap: 10px; }
+  .logo-lockup .word { font-weight: 900; letter-spacing: 4px; font-size: clamp(17px, 3vw, 23px); color: #fff; }
+  .logo-lockup .word small { display: block; letter-spacing: 1.6px; font-size: 10px; color: #8fb8ff; font-weight: 800; text-align: left; }
+  .hero-dili { width: clamp(72px, 13vw, 108px); height: auto; filter: drop-shadow(0 10px 18px rgba(0,0,0,.5)); animation: diliBob 2.6s ease-in-out infinite; }
+  #titleScreen { gap: 7px; }
+  @keyframes diliBob { 0%,100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-7px) rotate(1deg); } }
+  @media (prefers-reduced-motion: reduce) { .hero-dili { animation: none; } }
+  #keyStatus {
+    font-size: 12.5px; font-weight: 800; color: #ffe9b0; background: rgba(20,26,54,.8);
+    border: 1.5px dashed #4a5590; border-radius: 999px; padding: 5px 14px; margin: 0;
+  }
+  #keyStatus.on { color: #0c2b1a; background: #7dff8a; border-style: solid; border-color: #2f9e57; }
+  button:focus-visible, .tbtn:focus-visible { outline: 3px solid #ffd23e; outline-offset: 2px; }
+  .iconbtn:hover, .ghostbtn:hover { border-color: #ffd23e; color: #ffd23e; }
+  .bigbtn:hover { filter: brightness(1.07); }
+  .iconbtn.on { border-color: #7dff8a; color: #7dff8a; }
+  /* ---------- FULL SCREEN (native or fallback): stage fills the whole window ---------- */
+  body.fs #wrap { padding: 0; gap: 0; background: #05070f; }
+  body.fs #stage {
+    width: min(100vw, calc(100dvh * 16 / 9)); max-height: 100dvh;
+    height: min(100dvh, calc(100vw * 9 / 16));
+  }
+  body.fs canvas { border-radius: 0; box-shadow: none; }
+  body.fs .screen { border-radius: 0; }
+  body.fs #topbar {
+    position: absolute; top: 8px; left: 10px; right: 10px; z-index: 30; width: auto;
+    opacity: .35; transition: opacity .2s;
+  }
+  body.fs #topbar:hover, body.fs #topbar:focus-within { opacity: 1; }
+  body.pseudo-fs { position: fixed; inset: 0; width: 100%; }
+  /* ---------- small screens: fit everything inside the 16:9 stage ---------- */
+  @media (max-width: 640px) {
+    #wrap { gap: 5px; }
+    #topbar .name { font-size: 12px; }
+    .iconbtn { min-height: 36px; font-size: 12px; padding: 5px 9px; }
+    .screen { gap: 6px; padding: 10px 12px; }
+    .tagline { display: none; }
+    #titleScreen h1 { font-size: 27px; }
+    .hero-dili { width: 58px; }
+    .logo-lockup .word { font-size: 14px; letter-spacing: 2.5px; }
+    #keyStatus { font-size: 11px; padding: 4px 10px; }
+    body.fs #topbar { opacity: .9; }
+    .sub { font-size: 11.5px; line-height: 1.35; max-width: 340px; }
+    .keys { display: none; }
+    .bigbtn { min-height: 44px; padding: 9px 22px; font-size: 16px; }
+    #endScreen h2 { font-size: 23px; }
+    #endStats { font-size: 13px; line-height: 1.5; }
+    .quip { font-size: 12px; }
+    .tbtn { width: 48px; height: 48px; font-size: 18px; }
+    .tbtn.fire { width: 56px; height: 56px; }
+    .tbtn.jump .sym { font-size: 16px; }
+    .tbtn.jump .lbl { font-size: 10px; letter-spacing: 1px; }
+    #touch .cluster { gap: 7px; }
+    #touch { padding: 0 7px 8px; }
+  }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="topbar">
+    <div class="brand">
+      <svg width="42" height="27" viewBox="0 0 40 25" role="img" aria-label="DLICOM logo"><path d="M39.3884 2.03184C40.4043 1.56394 40.0802 0 38.967 0H19.9199C14.4163 0 9.78699 3.85968 8.44412 9.09388H8.45669C8.29474 9.71071 8.1768 10.3454 8.10919 10.9962C8.06988 11.3993 8.04944 11.8073 8.04944 12.2218V12.6443C8.08246 13.8764 8.29002 15.0631 8.65012 16.1803L11.6661 14.7911L14.1599 13.6433L13.0152 12.4646L19.9921 5.28115L23.8023 9.20397L25.5209 8.41229L30.3593 6.18455L39.3869 2.0286L39.3884 2.03184Z" fill="#ffffff"/><path d="M19.9903 8.02686L15.6819 12.4629L16.001 12.7932L21.9559 10.0522L19.9903 8.02686Z" fill="#ffffff"/><path d="M0.611931 22.9281C-0.403873 23.3961 -0.0799483 24.96 1.03335 24.96H20.0805C25.5856 24.96 30.215 21.1003 31.5563 15.8661H31.5436C31.7056 15.2492 31.8236 14.6146 31.8911 13.9638C31.9305 13.5607 31.9508 13.1527 31.9508 12.7382V12.3157C31.9178 11.0836 31.7104 9.8969 31.3502 8.77979L28.3342 10.1689L25.8404 11.3167L26.985 12.4954L20.0082 19.6788L16.198 15.756L14.4794 16.5477L9.64095 18.7754L0.611931 22.9281Z" fill="#ffffff"/><path d="M20.0069 16.9274L24.3155 12.4914L23.9947 12.1611L18.0414 14.9021L20.0069 16.9274Z" fill="#ffffff"/><path d="M19.9904 8.03271L15.6819 12.4688L19.9904 16.9049L24.299 12.4688L19.9904 8.03271Z" fill="#ffffff"/></svg>
+      <div class="dlicom">DLICOM<small>DILI STREAK BRAWL</small></div>
+    </div>
+    <div style="display:flex; gap:8px;">
+      <button class="iconbtn on" id="muteBtn" aria-label="Toggle sound on or off">🔊 Sound</button>
+      <button class="iconbtn" id="pauseBtn" aria-label="Pause or resume game">⏸ Pause</button>
+      <button class="iconbtn" id="fsBtn" aria-label="Toggle full screen">⛶ Full screen</button>
+    </div>
+  </div>
+
+  <div id="stage">
+    <canvas id="game" width="960" height="540" tabindex="0" aria-label="Game screen — click here, then play with the keyboard"></canvas>
+
+    <div id="touch">
+      <div class="cluster">
+        <div class="tbtn" role="button" aria-label="Move left" data-k="left">◀</div>
+        <div class="tbtn" role="button" aria-label="Move right" data-k="right">▶</div>
+        <div class="tbtn" role="button" aria-label="Aim up" data-k="up">▲</div>
+      </div>
+      <div class="cluster">
+        <div class="tbtn" role="button" aria-label="Throw grenade" data-k="grenade">💣</div>
+        <div class="tbtn jump" role="button" aria-label="Jump" data-k="jump"><span class="sym">⤒</span><span class="lbl">JUMP</span></div>
+        <div class="tbtn fire" role="button" aria-label="Fire" data-k="fire">●</div>
+      </div>
+    </div>
+
+    <div class="screen" id="titleScreen">
+      <div class="logo-lockup">
+        <svg width="48" height="30" viewBox="0 0 40 25" role="img" aria-label="DLICOM logo"><path d="M39.3884 2.03184C40.4043 1.56394 40.0802 0 38.967 0H19.9199C14.4163 0 9.78699 3.85968 8.44412 9.09388H8.45669C8.29474 9.71071 8.1768 10.3454 8.10919 10.9962C8.06988 11.3993 8.04944 11.8073 8.04944 12.2218V12.6443C8.08246 13.8764 8.29002 15.0631 8.65012 16.1803L11.6661 14.7911L14.1599 13.6433L13.0152 12.4646L19.9921 5.28115L23.8023 9.20397L25.5209 8.41229L30.3593 6.18455L39.3869 2.0286L39.3884 2.03184Z" fill="#ffffff"/><path d="M19.9903 8.02686L15.6819 12.4629L16.001 12.7932L21.9559 10.0522L19.9903 8.02686Z" fill="#ffffff"/><path d="M0.611931 22.9281C-0.403873 23.3961 -0.0799483 24.96 1.03335 24.96H20.0805C25.5856 24.96 30.215 21.1003 31.5563 15.8661H31.5436C31.7056 15.2492 31.8236 14.6146 31.8911 13.9638C31.9305 13.5607 31.9508 13.1527 31.9508 12.7382V12.3157C31.9178 11.0836 31.7104 9.8969 31.3502 8.77979L28.3342 10.1689L25.8404 11.3167L26.985 12.4954L20.0082 19.6788L16.198 15.756L14.4794 16.5477L9.64095 18.7754L0.611931 22.9281Z" fill="#ffffff"/><path d="M20.0069 16.9274L24.3155 12.4914L23.9947 12.1611L18.0414 14.9021L20.0069 16.9274Z" fill="#ffffff"/><path d="M19.9904 8.03271L15.6819 12.4688L19.9904 16.9049L24.299 12.4688L19.9904 8.03271Z" fill="#ffffff"/></svg>
+        <div class="word">DLICOM<small>Official DILI Game</small></div>
+      </div>
+      <svg class="hero-dili" viewBox="0 0 320 360" role="img" aria-label="Dili — DLICOM mascot: blue speech-bubble face, bubble helmet, cape and white D on chest">
+        <defs><linearGradient id="diliSuit" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4db2ff"/><stop offset="1" stop-color="#1e6fe8"/></linearGradient></defs>
+        <path d="M108 138 C54 190 44 288 76 344 L152 344 C122 282 118 198 130 152 Z" fill="#1d4ed8"/>
+        <rect x="140" y="282" width="24" height="42" rx="9" fill="#2f7bff"/>
+        <rect x="172" y="282" width="24" height="42" rx="9" fill="#2f7bff"/>
+        <rect x="132" y="318" width="38" height="17" rx="8" fill="#ffffff"/>
+        <rect x="166" y="318" width="38" height="17" rx="8" fill="#ffffff"/>
+        <path d="M118 148 Q160 130 202 148 L210 252 Q160 272 110 252 Z" fill="url(#diliSuit)"/>
+        <text x="160" y="224" text-anchor="middle" font-size="54" font-weight="800" fill="#ffffff" font-family="inherit">D</text>
+        <path d="M124 166 C94 150 80 118 88 90" fill="none" stroke="#2f7bff" stroke-width="21" stroke-linecap="round"/>
+        <g transform="rotate(-8 84 62)"><rect x="64" y="30" width="40" height="62" rx="8" fill="#0b1e4b" stroke="#9db9ec" stroke-width="2"/><g transform="translate(69 52.6) scale(0.75)"><path d="M39.3884 2.03184C40.4043 1.56394 40.0802 0 38.967 0H19.9199C14.4163 0 9.78699 3.85968 8.44412 9.09388H8.45669C8.29474 9.71071 8.1768 10.3454 8.10919 10.9962C8.06988 11.3993 8.04944 11.8073 8.04944 12.2218V12.6443C8.08246 13.8764 8.29002 15.0631 8.65012 16.1803L11.6661 14.7911L14.1599 13.6433L13.0152 12.4646L19.9921 5.28115L23.8023 9.20397L25.5209 8.41229L30.3593 6.18455L39.3869 2.0286L39.3884 2.03184Z" fill="#ffffff"/><path d="M19.9903 8.02686L15.6819 12.4629L16.001 12.7932L21.9559 10.0522L19.9903 8.02686Z" fill="#ffffff"/><path d="M0.611931 22.9281C-0.403873 23.3961 -0.0799483 24.96 1.03335 24.96H20.0805C25.5856 24.96 30.215 21.1003 31.5563 15.8661H31.5436C31.7056 15.2492 31.8236 14.6146 31.8911 13.9638C31.9305 13.5607 31.9508 13.1527 31.9508 12.7382V12.3157C31.9178 11.0836 31.7104 9.8969 31.3502 8.77979L28.3342 10.1689L25.8404 11.3167L26.985 12.4954L20.0082 19.6788L16.198 15.756L14.4794 16.5477L9.64095 18.7754L0.611931 22.9281Z" fill="#ffffff"/><path d="M20.0069 16.9274L24.3155 12.4914L23.9947 12.1611L18.0414 14.9021L20.0069 16.9274Z" fill="#ffffff"/><path d="M19.9904 8.03271L15.6819 12.4688L19.9904 16.9049L24.299 12.4688L19.9904 8.03271Z" fill="#ffffff"/></g></g>
+        <path d="M198 166 C228 152 242 126 238 98" fill="none" stroke="#2f7bff" stroke-width="21" stroke-linecap="round"/>
+        <circle cx="238" cy="94" r="12" fill="#4db2ff"/>
+        <path d="M146 118 L172 118 L148 142 Z" fill="#2f8fff"/>
+        <rect x="110" y="34" width="100" height="88" rx="27" fill="url(#diliSuit)"/>
+        <polygon points="141,62 151,74 141,86 131,74" fill="#eaf7ff"/>
+        <polygon points="183,62 193,74 183,86 173,74" fill="#eaf7ff"/>
+        <path d="M147 97 Q160 107 173 97" fill="none" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round"/>
+        <circle cx="126" cy="93" r="6" fill="#ff8fb8" opacity=".65"/>
+        <circle cx="198" cy="93" r="6" fill="#ff8fb8" opacity=".65"/>
+        <circle cx="160" cy="80" r="66" fill="rgba(170,215,255,.10)" stroke="rgba(255,255,255,.65)" stroke-width="3"/>
+        <ellipse cx="128" cy="48" rx="21" ry="10" transform="rotate(-24 128 48)" fill="#ffffff" opacity=".35"/>
+      </svg>
+      <p class="tagline">★ DLICOM's Coolest Commando — DILI ★</p>
+      <h1>DILI<br><span class="brawl">STREAK BRAWL</span></h1>
+      <p class="sub">Run, shoot, rescue the POWs! Blast robo-goons across 3 stages,
+      grab big guns and smash the boss tanks. Keep the kills coming to raise your <b style="color:#ffd23e">streak</b> —
+      get hit and the streak resets. No mercy, all fun!</p>
+      <button class="bigbtn" id="startBtn">▶ &nbsp;Start Mission</button>
+      <p id="keyStatus">⌨️ On PC: press any key — the mission will start</p>
+      <div class="keys">
+        <span><b>◀ ▶</b> / <b>A D</b> Move</span>
+        <span><b>▲</b> / <b>W</b> Aim up</span>
+        <span><b>▼</b> / <b>S</b> Crouch</span>
+        <span><b>Z</b> / <b>J</b> / <b>Space</b> Fire (hold it!)</span>
+        <span><b>X</b> / <b>K</b> Jump</span>
+        <span><b>C</b> / <b>L</b> Grenade</span>
+        <span><b>P</b> Pause</span>
+        <span><b>M</b> Sound</span>
+        <span><b>F</b> Full screen</span>
+        <span>Gamepad works too 🎮</span>
+      </div>
+      <p class="sub" style="font-size:12.5px; color:#aab4e8;">🔊 Sound starts when the mission begins. On phone, use the on-screen buttons.</p>
+    </div>
+
+    <div class="screen hidden" id="endScreen">
+      <h2 id="endTitle">Mission Complete!</h2>
+      <p class="quip" id="endQuip"></p>
+      <div id="endStats"></div>
+      <button class="bigbtn" id="againBtn">↻ &nbsp;Play Again</button>
+    </div>
+
+    <div id="errCard">
+      <div>
+        <p style="font-size:18px; font-weight:800;">Oops! Something got stuck.</p>
+        <p style="color:#aab4e8;">Reload once and try again — the game will be right here.</p>
+        <button class="bigbtn" id="reloadBtn">↻ Reload</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+window.addEventListener("error", function () {
+  var e = document.getElementById("errCard");
+  if (e && !window.__gameBooted) e.style.display = "flex";
+});
+
+/* ============================================================
+   DILI STREAK BRAWL — a run-and-gun brawler
+   Canvas 960x540. No storage, no network, no dependencies.
+   ============================================================ */
+var W = 960, H = 540, GROUND = 470;
+var cv = document.getElementById("game");
+var ctx = cv.getContext("2d");
+
+function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
+function rnd(a, b) { return a + Math.random() * (b - a); }
+function irnd(a, b) { return Math.floor(rnd(a, b + 1)); }
+function hit(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
+
+/* ---------------- AUDIO (tiny synth, no files) ---------------- */
+var AC = null, masterGain = null, muted = false, musicTimer = null, musicStep = 0;
+function audio() {
+  if (!AC) {
+    try {
+      AC = new (window.AudioContext || window.webkitAudioContext)();
+      masterGain = AC.createGain(); masterGain.gain.value = 0.9;
+      masterGain.connect(AC.destination);
+    } catch (e) { AC = null; }
+  }
+  if (AC && AC.state === "suspended") { var p = AC.resume(); if (p && p.catch) p.catch(function () {}); }
+  return AC;
+}
+function outNode() { return masterGain || (AC && AC.destination); }
+function beep(freq, dur, type, vol, slide) {
+  if (muted) return; var ac = audio(); if (!ac) return;
+  var o = ac.createOscillator(), g = ac.createGain(), t = ac.currentTime;
+  o.type = type || "square"; o.frequency.setValueAtTime(freq, t);
+  if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(20, slide), t + dur);
+  g.gain.setValueAtTime(vol || 0.12, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  o.connect(g); g.connect(outNode()); o.start(t); o.stop(t + dur + 0.02);
+}
+function noise(dur, vol, freq) {
+  if (muted) return; var ac = audio(); if (!ac) return;
+  var n = Math.floor(ac.sampleRate * dur), buf = ac.createBuffer(1, n, ac.sampleRate);
+  var d = buf.getChannelData(0); for (var i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n);
+  var src = ac.createBufferSource(); src.buffer = buf;
+  var f = ac.createBiquadFilter(); f.type = "lowpass"; f.frequency.value = freq || 900;
+  var g = ac.createGain(); g.gain.value = vol || 0.2;
+  src.connect(f); f.connect(g); g.connect(outNode()); src.start();
+}
+var SFX = {
+  shoot:  function () { beep(rnd(700, 900), 0.06, "square", 0.10, 200); },
+  big:    function () { beep(220, 0.1, "sawtooth", 0.16, 60); noise(0.08, 0.16, 1400); },
+  rocket: function () { noise(0.22, 0.24, 700); beep(140, 0.2, "sawtooth", 0.12, 40); },
+  boom:   function () { noise(0.35, 0.4, 500); beep(90, 0.3, "sine", 0.32, 30); },
+  pop:    function () { beep(rnd(300, 420), 0.07, "square", 0.16, 90); noise(0.06, 0.18, 2000); },
+  hurt:   function () { beep(160, 0.18, "sawtooth", 0.24, 60); },
+  jump:   function () { beep(280, 0.12, "square", 0.11, 620); },
+  pickup: function () { beep(660, 0.08, "square", 0.16); setTimeout(function(){ beep(990, 0.12, "square", 0.16); }, 70); },
+  rescue: function () { [523, 659, 784, 1046].forEach(function (f, i) { setTimeout(function(){ beep(f, 0.12, "square", 0.16); }, i * 80); }); },
+  streak: function () { beep(1180, 0.09, "square", 0.15, 1600); }
+};
+function playJingle() { /* start-of-game jingle: proves sound is ON */
+  [392, 523, 659, 784].forEach(function (f, i) { setTimeout(function(){ beep(f, 0.14, "square", 0.18); }, i * 90); });
+}
+/* Chiptune loop at speaker-friendly pitches: bass one octave up + a lead line. */
+var BASS = [110, 0, 110, 0, 130.8, 0, 110, 0, 98, 0, 98, 0, 146.8, 0, 164.8, 0];
+var LEAD = [440, 0, 523, 587, 0, 523, 440, 0, 392, 0, 440, 494, 523, 0, 587, 0];
+function musicTick() {
+  if (muted || !AC || AC.state !== "running" || state !== "play" || paused) return;
+  var f = BASS[musicStep % BASS.length];
+  if (f) beep(f, 0.15, "triangle", 0.22);
+  var l = LEAD[musicStep % LEAD.length];
+  if (l) beep(l, 0.11, "square", 0.055);
+  if (musicStep % 2 === 0) noise(0.03, 0.05, 6000);
+  if (musicStep % 8 === 4) beep(392, 0.1, "square", 0.05);
+  musicStep++;
+}
+function startMusic() { if (!musicTimer) musicTimer = setInterval(musicTick, 150); }
+/* Unlock audio on ANY first gesture — click, tap or key — and keep it resumed. */
+document.addEventListener("pointerdown", function () { audio(); }, true);
+document.addEventListener("visibilitychange", function () { if (!document.hidden) audio(); });
+
+/* ---------------- INPUT ---------------- */
+var keys = { left: false, right: false, up: false, down: false, fire: false, jump: false, grenade: false };
+var jumpPressed = false, grenadePressed = false;
+var KEYMAP = {
+  ArrowLeft: "left", KeyA: "left", ArrowRight: "right", KeyD: "right",
+  ArrowUp: "up", KeyW: "up", ArrowDown: "down", KeyS: "down",
+  KeyZ: "fire", KeyJ: "fire", Space: "fire",
+  KeyX: "jump", KeyK: "jump",
+  KeyC: "grenade", KeyL: "grenade", KeyV: "grenade"
+};
+/* fallback by key label, for layouts/browsers where e.code differs */
+var KEYMAP_KEY = {
+  "arrowleft": "left", "a": "left", "arrowright": "right", "d": "right",
+  "arrowup": "up", "w": "up", "arrowdown": "down", "s": "down",
+  "z": "fire", "j": "fire", " ": "fire",
+  "x": "jump", "k": "jump", "c": "grenade", "l": "grenade", "v": "grenade"
+};
+function resolveKey(e) {
+  if (e.code && KEYMAP[e.code]) return KEYMAP[e.code];
+  var ky = (e.key || "").toLowerCase();
+  return KEYMAP_KEY[ky] || null;
+}
+function focusGame() { try { cv.focus({ preventScroll: true }); } catch (err) { try { cv.focus(); } catch (e2) {} } }
+function noteKey(name) {
+  var el = document.getElementById("keyStatus");
+  if (el) { el.textContent = "⌨️ Keyboard active ✓ — Last key: " + name; el.classList.add("on"); }
+}
+document.addEventListener("keydown", function (e) {
+  audio(); /* a key press is a user gesture: unlock + resume sound */
+  /* a focused button must never swallow Space/Enter as a "click" mid-game */
+  var ae = document.activeElement;
+  if (ae && ae.tagName === "BUTTON" && ae.id !== "startBtn" && ae.id !== "againBtn") ae.blur();
+  var k = resolveKey(e);
+  if (k) e.preventDefault();
+  noteKey(e.key || e.code);
+  /* utility keys (full screen / mute / pause / Esc) never start the game by accident */
+  if (e.code === "KeyF" || e.code === "KeyM" || e.code === "KeyP" || e.code === "Escape") return;
+  /* Title / end screens: ANY key starts — no hunting for the right key. */
+  if (state === "title") { document.getElementById("startBtn").click(); if (k) keys[k] = true; return; }
+  if (state === "over" || state === "win") {
+    if (k === "jump" || k === "fire" || e.code === "Enter") document.getElementById("againBtn").click();
+    return;
+  }
+  if (!k) return;
+  if (k === "jump" && !keys.jump) jumpPressed = true;
+  if (k === "grenade" && !keys.grenade) grenadePressed = true;
+  keys[k] = true;
+}, true);
+document.addEventListener("keyup", function (e) {
+  var k = resolveKey(e); if (!k) return;
+  e.preventDefault(); keys[k] = false;
+}, true);
+window.addEventListener("blur", function () {
+  for (var k in keys) keys[k] = false;
+});
+document.addEventListener("pointerdown", function () { focusGame(); });
+/* touch + mouse via Pointer Events (one path, no double-firing) */
+if ("ontouchstart" in window || navigator.maxTouchPoints > 0) document.body.classList.add("touch");
+Array.prototype.forEach.call(document.querySelectorAll(".tbtn"), function (el) {
+  var k = el.getAttribute("data-k");
+  function on(e) {
+    e.preventDefault(); audio();
+    try { el.setPointerCapture(e.pointerId); } catch (err) {}
+    if (k === "jump" && !keys.jump) jumpPressed = true;
+    if (k === "grenade" && !keys.grenade) grenadePressed = true;
+    keys[k] = true; el.classList.add("on");
+  }
+  function off(e) { keys[k] = false; el.classList.remove("on"); }
+  el.addEventListener("pointerdown", on);
+  el.addEventListener("pointerup", off);
+  el.addEventListener("pointercancel", off);
+  el.addEventListener("lostpointercapture", off);
+  el.addEventListener("contextmenu", function (e) { e.preventDefault(); });
+});
+/* gamepad */
+var padJumpWas = false, padGrenWas = false;
+var padState = { left: false, right: false, up: false, fire: false };
+function pollPad() {
+  var pads = [];
+  try { pads = navigator.getGamepads ? navigator.getGamepads() : []; } catch (err) { return; }
+  if (!pads) return;
+  var p = null; for (var i = 0; i < pads.length; i++) if (pads[i]) { p = pads[i]; break; }
+  if (!p) { padState.left = padState.right = padState.up = padState.fire = false; return; }
+  var ax = p.axes[0] || 0;
+  padState.left = ax < -0.35 || !!(p.buttons[14] && p.buttons[14].pressed);
+  padState.right = ax > 0.35 || !!(p.buttons[15] && p.buttons[15].pressed);
+  padState.up = !!(p.buttons[12] && p.buttons[12].pressed) || (p.axes[1] || 0) < -0.5;
+  padState.fire = !!(p.buttons[2] && p.buttons[2].pressed) || !!(p.buttons[7] && p.buttons[7].pressed);
+  var j = !!(p.buttons[0] && p.buttons[0].pressed), g = !!(p.buttons[1] && p.buttons[1].pressed);
+  if (j && !padJumpWas) jumpPressed = true;
+  if (g && !padGrenWas) grenadePressed = true;
+  padJumpWas = j; padGrenWas = g;
+}
+/* ---------------- GAME STATE ---------------- */
+var state = "title"; // title | play | stageclear | over | win
+var paused = false;
+var cam = 0, shake = 0, hitStop = 0, slowMo = 0, flashT = 0;
+var score = 0, hiScore = 0, totalKills = 0, totalRescues = 0;
+var stageIdx = 0, stageTime = 0, clearTimer = 0;
+var bullets = [], ebullets = [], grenades = [], enemies = [], parts = [], popups = [], pickups = [], shellsFx = [], cages = [];
+var boss = null, bossMode = false;
+
+var QUIPS = [
+  "The enemy's gone packing!",
+  "Dili never stops, he only reloads!",
+  "That was just the trailer!",
+  "Tell Mom, Dili came home a winner!",
+  "Full power, zero tension!",
+  "The streak is hot — don't touch!"
+];
+var STAGE_INTROS = [
+  "Stage 1 — Jungle Outpost", "Stage 2 — Desert Factory", "Stage 3 — Neon Harbor"
+];
+var STAGE_SUBS = [
+  "Robo-goons have surrounded the jungle camp. Clear them out!",
+  "A factory hides under the sand. The boss tank is built here!",
+  "The final base. Admiral Crab-Tank is waiting for you!"
+];
+
+var STAGES = [
+  { len: 4300, sky: ["#2b1055", "#7597de", "#ff9d5c"], hill: "#3a2b63", hill2: "#584a8a", ground: "#4a3566", groundTop: "#7ac74f", name: "jungle" },
+  { len: 4600, sky: ["#1a0533", "#b23a48", "#ffb35c"], hill: "#5c2333", hill2: "#8a3b47", ground: "#6e3b2a", groundTop: "#e0a458", name: "desert" },
+  { len: 4600, sky: ["#050a2e", "#123a6e", "#2ec4b6"], hill: "#0d2247", hill2: "#173a6e", ground: "#1d2b4d", groundTop: "#3e7cb1", name: "harbor" }
+];
+
+/* spawn script per stage: [worldX, type] */
+var SPAWNS = [
+  [[500,"grunt"],[760,"grunt"],[1050,"cage"],[1250,"drone"],[1500,"grunt"],[1560,"grunt"],[1900,"shield"],[2150,"cage"],[2350,"drone"],[2420,"drone"],[2750,"grenadier"],[3050,"grunt"],[3120,"shield"],[3450,"turret"],[3700,"drone"],[3780,"grunt"],[3950,"cage"]],
+  [[450,"grunt"],[700,"drone"],[980,"shield"],[1200,"cage"],[1500,"grenadier"],[1750,"grunt"],[1820,"grunt"],[2100,"turret"],[2400,"drone"],[2480,"drone"],[2700,"cage"],[2950,"shield"],[3200,"grenadier"],[3500,"turret"],[3750,"drone"],[3900,"grunt"],[4100,"cage"]],
+  [[450,"drone"],[700,"grunt"],[1000,"shield"],[1250,"cage"],[1550,"turret"],[1850,"grenadier"],[2100,"drone"],[2180,"drone"],[2450,"grunt"],[2520,"shield"],[2800,"cage"],[3050,"turret"],[3350,"grenadier"],[3600,"drone"],[3680,"drone"],[3950,"shield"],[4150,"cage"]]
+];
+var spawnPtr = 0;
+var emptyT = 0; /* frames with an empty field and spawns still pending — drives the anti-stall fallback */
+
+/* ---------------- PLAYER ---------------- */
+var P = null;
+function newPlayer() {
+  return {
+    x: 80, y: GROUND - 52, w: 30, h: 52, vx: 0, vy: 0, face: 1,
+    onGround: true, hp: 4, maxHp: 4, inv: 0, fireCd: 0, grenades: 5,
+    weapon: "pistol", weaponT: 0, runT: 0, dead: false, deadT: 0,
+    streak: 0, bestStreak: 0, aimUp: false, crouch: false, muzzle: 0, hurtT: 0
+  };
+}
+var WEAPONS = {
+  pistol: { rate: 11, dmg: 1, spread: 1, speed: 13, sfx: "shoot", label: "Pistol" },
+  mg:     { rate: 5,  dmg: 1, spread: 1, speed: 14, sfx: "shoot", label: "Machine Gun" },
+  spread: { rate: 16, dmg: 1, spread: 5, speed: 12, sfx: "big",   label: "Spread Shot" },
+  rocket: { rate: 26, dmg: 3, spread: 1, speed: 10, sfx: "rocket", label: "Rocket Launcher" }
+};
+
+/* ---------------- FX helpers ---------------- */
+function burst(x, y, n, colors, spd, life, grav) {
+  for (var i = 0; i < n; i++) {
+    var a = rnd(0, Math.PI * 2), s = rnd(spd * 0.3, spd);
+    parts.push({ x: x, y: y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 1, life: rnd(life * 0.5, life), max: life, c: colors[irnd(0, colors.length - 1)], size: rnd(2, 5), grav: grav || 0 });
+  }
+}
+function popup(x, y, txt, c, screen) { popups.push({ x: x, y: y, txt: txt, c: c || "#ffd23e", life: screen ? 130 : 55, vy: -1.1, screen: !!screen }); }
+function addShake(n) { shake = Math.min(16, shake + n); }
+function explosion(x, y, big) {
+  burst(x, y, big ? 42 : 22, ["#ffd23e", "#ff7b3e", "#e2543e", "#fff3c4"], big ? 7 : 5, big ? 40 : 28, 0.25);
+  burst(x, y, big ? 16 : 8, ["#3a3a4a", "#55556a"], 2.5, 55, -0.02);
+  parts.push({ ring: true, x: x, y: y, r: 4, vr: big ? 5.5 : 3.5, life: 18, max: 18, c: "#ffe9b0" });
+  SFX.boom(); addShake(big ? 11 : 6); hitStop = Math.max(hitStop, big ? 7 : 3);
+}
+
+/* ---------------- ENEMIES ---------------- */
+function spawnEnemy(type, x) {
+  var base = { type: type, x: x, w: 30, h: 46, vx: 0, vy: 0, t: rnd(0, 100), fireCd: irnd(50, 130), flash: 0, dead: false };
+  if (type === "grunt")     { base.hp = 3; base.y = GROUND - 46; base.speed = rnd(0.7, 1.1); }
+  if (type === "shield")    { base.hp = 6; base.y = GROUND - 48; base.h = 48; base.speed = 0.55; base.shieldHp = 4; }
+  if (type === "grenadier") { base.hp = 4; base.y = GROUND - 46; base.speed = 0.4; }
+  if (type === "drone")     { base.hp = 2; base.w = 38; base.h = 22; base.y = rnd(120, 220); base.baseY = base.y; base.speed = rnd(1.2, 1.7); }
+  if (type === "turret")    { base.hp = 8; base.w = 40; base.h = 44; base.y = GROUND - 44; base.speed = 0; }
+  base.maxHp = base.hp;
+  enemies.push(base);
+}
+function spawnCage(x) { cages.push({ x: x, y: GROUND - 58, w: 40, h: 58, hp: 3, flash: 0, freed: false }); }
+function spawnBoss(stage) {
+  boss = {
+    x: cam + W + 60, y: GROUND - 118, w: 190, h: 118, hp: 90 + stage * 45, maxHp: 90 + stage * 45,
+    vx: -1.1, fireCd: 90, spawnCd: 300, flash: 0, t: 0, phase: 1, dead: false,
+    name: stage === 2 ? "Admiral Crab-Tank" : (stage === 1 ? "Desert Mauler MK-II" : "Jungle Juggernaut")
+  };
+  popup(W / 2, 150, "⚠ " + boss.name + " ⚠", "#ff5c5c", true);
+}
+function dropPickup(x, y, kind) { pickups.push({ x: x, y: y, w: 26, h: 26, kind: kind, t: 0, vy: -3, vx: rnd(-1, 1) }); }
+
+/* ---------------- RESET / FLOW ---------------- */
+function resetRun() {
+  score = 0; totalKills = 0; totalRescues = 0; stageIdx = 0;
+  P = newPlayer(); loadStage(0);
+}
+function loadStage(i) {
+  stageIdx = i; cam = 0; stageTime = 0; spawnPtr = 0; emptyT = 0; bossMode = false; boss = null;
+  bullets = []; ebullets = []; grenades = []; enemies = []; pickups = []; cages = []; popups = [];
+  P.x = 80; P.y = GROUND - 52; P.vx = 0; P.vy = 0; P.hp = P.maxHp; P.inv = 90; P.weapon = "pistol"; P.weaponT = 0; P.grenades = Math.max(P.grenades, 5); P.streak = 0;
+  popup(W / 2, 170, STAGE_INTROS[i], "#ffd23e", true);
+  popup(W / 2, 205, STAGE_SUBS[i], "#ffffff", true);
+  paused = false; syncPauseBtn();
+  state = "play";
+}
+function endGame(win) {
+  state = win ? "win" : "over";
+  hiScore = Math.max(hiScore, score);
+  var t = document.getElementById("endTitle"), q = document.getElementById("endQuip"), s = document.getElementById("endStats");
+  t.textContent = win ? "🏆 All Three Bosses Down! DILI LEGEND!" : "💥 DILI Is Down!";
+  t.style.color = win ? "#ffd23e" : "#ff7b6b";
+  q.textContent = win ? "“" + QUIPS[irnd(0, QUIPS.length - 1)] + "” — Dili, after clearing all three stages" :
+                        "“Falling isn't failure — stopping is. One more try, Commando!”";
+  s.innerHTML = "Score <b>" + score + "</b> &nbsp;·&nbsp; Best <b>" + hiScore + "</b><br>" +
+    "Kills <b>" + totalKills + "</b> &nbsp;·&nbsp; POWs Rescued <b>" + totalRescues + "</b> &nbsp;·&nbsp; Best Streak <b>×" + (1 + Math.floor(P.bestStreak / 5)) + "</b> (" + P.bestStreak + " kills)";
+  document.getElementById("endScreen").classList.remove("hidden");
+  if (win) { SFX.rescue(); }
+}
+
+/* ---------------- UPDATE ---------------- */
+function hurtPlayer(dmg) {
+  if (P.inv > 0 || P.dead) return;
+  P.hp -= dmg; P.inv = 80; P.hurtT = 12; P.streak = 0;
+  SFX.hurt(); addShake(7); hitStop = Math.max(hitStop, 4);
+  burst(P.x + 15, P.y + 24, 12, ["#ff5c5c", "#fff"], 4, 24, 0.2);
+  popup(P.x + 15, P.y - 14, "Ouch!", "#ff8a7a");
+  if (P.hp <= 0) { P.dead = true; P.deadT = 0; explosion(P.x + 15, P.y + 26, false); }
+}
+function streakMult() { return 1 + Math.floor(P.streak / 5); }
+function killEnemy(e, idx) {
+  e.dead = true; totalKills++; P.streak++; P.bestStreak = Math.max(P.bestStreak, P.streak);
+  var pts = (e.type === "turret" ? 300 : e.type === "shield" ? 200 : e.type === "drone" ? 150 : 100) * streakMult();
+  score += pts;
+  popup(e.x + e.w / 2, e.y - 8, "+" + pts, streakMult() > 1 ? "#3ee6c4" : "#ffd23e");
+  if (P.streak > 0 && P.streak % 10 === 0) { popup(P.x + 15, P.y - 26, "🔥 Streak ×" + streakMult() + "!", "#ff9d2e"); SFX.streak(); }
+  explosion(e.x + e.w / 2, e.y + e.h / 2, e.type === "turret");
+  if (e.type !== "turret" && Math.random() < 0.10) dropPickup(e.x + 4, e.y + 10, Math.random() < 0.5 ? "medkit" : "grenade");
+  enemies.splice(idx, 1);
+}
+function playerShoot() {
+  var wp = WEAPONS[P.weapon];
+  var up = P.aimUp;
+  var gx = P.x + (P.face > 0 ? 34 : -6), gy = P.y + (up ? -6 : 18);
+  if (up) { gx = P.x + 13; }
+  var angles = wp.spread === 5 ? [-0.28, -0.14, 0, 0.14, 0.28] : [rnd(-0.02, 0.02)];
+  for (var i = 0; i < angles.length; i++) {
+    var a = angles[i], vx, vy;
+    if (up) { vx = Math.sin(a) * wp.speed; vy = -Math.cos(a) * wp.speed; }
+    else { vx = Math.cos(a) * wp.speed * P.face; vy = Math.sin(a) * wp.speed; }
+    bullets.push({ x: gx, y: gy, vx: vx, vy: vy, w: P.weapon === "rocket" ? 14 : 8, h: P.weapon === "rocket" ? 7 : 4, dmg: wp.dmg, rocket: P.weapon === "rocket", life: 90 });
+  }
+  P.muzzle = 4;
+  shellsFx.push({ x: P.x + 16, y: P.y + 20, vx: -P.face * rnd(1, 2.4), vy: rnd(-3.4, -2.2), life: 26, rot: rnd(0, 6) });
+  SFX[wp.sfx]();
+}
+
+function update() {
+  if (state !== "play" || paused) return;
+  stageTime++;
+  pollPad();
+  var st = STAGES[stageIdx];
+
+  /* spawns */
+  var list = SPAWNS[stageIdx];
+  var spawnedNow = false;
+  while (spawnPtr < list.length && cam + W + 80 > list[spawnPtr][0]) {
+    var s = list[spawnPtr];
+    if (s[1] === "cage") spawnCage(s[0]); else spawnEnemy(s[1], s[0]);
+    spawnPtr++; spawnedNow = true;
+  }
+  /* anti-stall fallback: spawns are camera-gated, so a player who stands still
+     after clearing a wave would wait forever. If the field stays empty for a
+     few seconds with spawns still pending, bring the next one in anyway. */
+  if (enemies.length > 0 || spawnedNow || bossMode) emptyT = 0;
+  else if (spawnPtr < list.length) {
+    emptyT++;
+    if (emptyT > 180) {
+      emptyT = 0;
+      var fs = list[spawnPtr];
+      var fx = Math.min(fs[0], cam + W - 50);
+      if (fs[1] === "cage") spawnCage(fx); else spawnEnemy(fs[1], fx);
+      spawnPtr++;
+    }
+  }
+  /* boss trigger */
+  if (!bossMode && spawnPtr >= list.length && enemies.length === 0 && cages.every(function (c) { return c.freed; })) {
+    bossMode = true; spawnBoss(stageIdx);
+  }
+
+  /* ---- player ---- */
+  if (!P.dead) {
+    P.aimUp = (keys.up || padState.up) && P.onGround;
+    P.crouch = !!(keys.down && P.onGround);
+    var sp = 3.4;
+    P.vx = 0;
+    if (!P.crouch && (keys.left || padState.left)) { P.vx = -sp; P.face = -1; }
+    if (!P.crouch && (keys.right || padState.right)) { P.vx = sp; P.face = 1; }
+    if (P.vx !== 0 && P.onGround) P.runT += Math.abs(P.vx) * 0.09; else if (P.onGround) P.runT = 0;
+    if (jumpPressed && P.onGround) { P.vy = -12.4; P.onGround = false; SFX.jump(); burst(P.x + 15, GROUND, 6, ["#cbb7ff", "#ffffff"], 2, 16, 0.05); }
+    P.vy = Math.min(15, P.vy + 0.62);
+    P.x += P.vx; P.y += P.vy;
+    var maxX = bossMode ? cam + W - 60 : st.len - 40;
+    P.x = clamp(P.x, cam + 4, maxX);
+    if (P.y >= GROUND - P.h) { P.y = GROUND - P.h; P.vy = 0; P.onGround = true; }
+    if (P.fireCd > 0) P.fireCd--;
+    if ((keys.fire || padState.fire) && P.fireCd <= 0) { playerShoot(); P.fireCd = WEAPONS[P.weapon].rate; }
+    if (grenadePressed && P.grenades > 0) {
+      P.grenades--;
+      grenades.push({ x: P.x + 15, y: P.y + 8, vx: P.face * rnd(5.4, 6.6), vy: -8.4, w: 10, h: 10, t: 0 });
+      beep(500, 0.08, "square", 0.06, 900);
+    }
+    if (P.weaponT > 0) { P.weaponT--; if (P.weaponT === 0) { P.weapon = "pistol"; popup(P.x + 15, P.y - 16, "Back to Pistol", "#aab4e8"); } }
+    if (P.inv > 0) P.inv--;
+    if (P.hurtT > 0) P.hurtT--;
+    if (P.muzzle > 0) P.muzzle--;
+  } else {
+    P.deadT++;
+    if (P.deadT === 55) endGame(false);
+  }
+  jumpPressed = false; grenadePressed = false;
+
+  /* camera */
+  var target = clamp(P.x - 300, 0, Math.max(0, st.len - W));
+  if (bossMode && boss) target = Math.max(target, st.len - W);
+  cam += (target - cam) * 0.12;
+  if (P.x < cam + 2) P.x = cam + 2;
+
+  /* ---- bullets ---- */
+  for (var bi = bullets.length - 1; bi >= 0; bi--) {
+    var b = bullets[bi]; b.x += b.vx; b.y += b.vy; b.life--;
+    if (b.rocket && stageTime % 2 === 0) parts.push({ x: b.x, y: b.y + 3, vx: rnd(-0.5, 0.5), vy: rnd(-0.4, 0.6), life: 16, max: 16, c: "#ffb35c", size: rnd(2, 4), grav: 0 });
+    var consumed = false;
+    function damageE(e) {
+      e.hp -= b.dmg; e.flash = 5;
+      burst(b.x, b.y, b.rocket ? 0 : 3, ["#ffe9b0", "#ffb35c"], 3, 12, 0.1);
+      if (b.rocket) { explosion(b.x, b.y, false); aoeDamage(b.x, b.y, 62, b.dmg); }
+      if (e.hp <= 0 && !e.dead) { var ix = enemies.indexOf(e); if (ix >= 0) killEnemy(e, ix); }
+      consumed = true;
+    }
+    for (var ei = enemies.length - 1; ei >= 0; ei--) { if (hit(b, enemies[ei])) { damageE(enemies[ei]); break; } }
+    if (!consumed && boss && !boss.dead && hit(b, boss)) {
+      boss.hp -= b.dmg; boss.flash = 4;
+      burst(b.x, b.y, 4, ["#ffe9b0", "#ff7b3e"], 3.4, 14, 0.1);
+      if (b.rocket) { explosion(b.x, b.y, false); }
+      score += 10;
+      if (boss.hp <= 0) bossDie();
+      consumed = true;
+    }
+    if (!consumed) for (var ci = 0; ci < cages.length; ci++) {
+      var cg = cages[ci];
+      if (!cg.freed && hit(b, cg)) {
+        cg.hp -= b.dmg; cg.flash = 5; consumed = true;
+        burst(b.x, b.y, 3, ["#cfe3ff"], 3, 10, 0.1);
+        if (cg.hp <= 0) freePow(cg);
+        break;
+      }
+    }
+    if (consumed || b.life <= 0 || b.x < cam - 60 || b.x > cam + W + 60 || b.y < -30 || b.y > GROUND + 4) bullets.splice(bi, 1);
+  }
+  function aoeDamage(x, y, r, dmg) {
+    for (var i = enemies.length - 1; i >= 0; i--) {
+      var e = enemies[i], dx = e.x + e.w / 2 - x, dy = e.y + e.h / 2 - y;
+      if (dx * dx + dy * dy < r * r) { e.hp -= dmg; e.flash = 5; if (e.hp <= 0 && !e.dead) killEnemy(e, i); }
+    }
+    if (boss && !boss.dead) { var bx = boss.x + boss.w / 2 - x, by = boss.y + boss.h / 2 - y; if (bx * bx + by * by < (r + 70) * (r + 70)) { boss.hp -= dmg; if (boss.hp <= 0) bossDie(); } }
+  }
+  function freePow(cg) {
+    cg.freed = true; totalRescues++; score += 250;
+    SFX.rescue();
+    popup(cg.x + 20, cg.y - 18, "POW Rescued! +250", "#3ee6c4");
+    burst(cg.x + 20, cg.y + 20, 16, ["#3ee6c4", "#ffd23e", "#fff"], 3.6, 30, 0.12);
+    var drops = ["mg", "spread", "rocket", "medkit", "grenade"];
+    dropPickup(cg.x + 7, cg.y + 6, drops[irnd(0, drops.length - 1)]);
+  }
+  function bossDie() {
+    if (!boss || boss.dead) return;
+    boss.dead = true; slowMo = 46; score += 2000;
+    explosion(boss.x + 95, boss.y + 55, true);
+    setTimeout(function () { if (boss) explosion(boss.x + rnd(30, 160), boss.y + rnd(10, 90), true); }, 160);
+    setTimeout(function () { if (boss) explosion(boss.x + rnd(30, 160), boss.y + rnd(10, 90), true); }, 340);
+    popup(boss.x + 95, boss.y - 22, "Boss Down! +2000", "#ffd23e");
+    setTimeout(function () {
+      boss = null;
+      if (stageIdx >= 2) { endGame(true); }
+      else {
+        state = "stageclear"; clearTimer = 0;
+        SFX.rescue();
+      }
+    }, 1150);
+  }
+
+  /* enemy bullets */
+  for (var qi = ebullets.length - 1; qi >= 0; qi--) {
+    var q = ebullets[qi]; q.x += q.vx; q.y += q.vy; if (q.arc) q.vy += 0.3;
+    var qb = { x: q.x - 4, y: q.y - 4, w: 8, h: 8 };
+    if (!P.dead && P.inv <= 0 && hit(qb, P)) { hurtPlayer(1); ebullets.splice(qi, 1); continue; }
+    if (q.y > GROUND + 2 || q.x < cam - 40 || q.x > cam + W + 40) {
+      if (q.arc && q.y >= GROUND - 4) { explosion(q.x, GROUND - 6, false); if (Math.abs(P.x + 15 - q.x) < 46 && !P.dead) hurtPlayer(1); }
+      ebullets.splice(qi, 1);
+    }
+  }
+
+  /* grenades */
+  for (var gi = grenades.length - 1; gi >= 0; gi--) {
+    var g = grenades[gi]; g.t++; g.vy += 0.5; g.x += g.vx; g.y += g.vy;
+    if (g.y >= GROUND - 10) { g.y = GROUND - 10; g.vy *= -0.42; g.vx *= 0.7; }
+    var boomNow = g.t > 95;
+    if (!boomNow) for (var ge = 0; ge < enemies.length; ge++) if (hit(g, enemies[ge])) { boomNow = true; break; }
+    if (!boomNow && boss && !boss.dead && hit(g, boss)) boomNow = true;
+    if (boomNow) { explosion(g.x + 5, g.y + 5, false); aoeDamage(g.x + 5, g.y + 5, 78, 4); grenades.splice(gi, 1); }
+  }
+
+  /* ---- enemies AI ---- */
+  for (var ai = enemies.length - 1; ai >= 0; ai--) {
+    var e = enemies[ai]; e.t++;
+    if (e.flash > 0) e.flash--;
+    var dxp = (P.x + 15) - (e.x + e.w / 2), adx = Math.abs(dxp);
+    if (e.type === "grunt") {
+      if (adx > 170) e.x += Math.sign(dxp) * e.speed; else if (adx < 90) e.x -= Math.sign(dxp) * e.speed * 0.5;
+      if (e.fireCd-- <= 0 && adx < 460 && !P.dead) { e.fireCd = irnd(95, 170); ebullets.push({ x: e.x + e.w / 2, y: e.y + 16, vx: Math.sign(dxp) * 4.6, vy: 0 }); beep(320, 0.07, "square", 0.045, 140); }
+    } else if (e.type === "shield") {
+      if (adx > 200) e.x += Math.sign(dxp) * e.speed;
+      if (e.fireCd-- <= 0 && adx < 420 && !P.dead) { e.fireCd = irnd(130, 200); ebullets.push({ x: e.x + e.w / 2, y: e.y + 18, vx: Math.sign(dxp) * 4.4, vy: 0 }); }
+    } else if (e.type === "grenadier") {
+      if (e.fireCd-- <= 0 && adx < 520 && adx > 120 && !P.dead) { e.fireCd = irnd(150, 230); ebullets.push({ x: e.x + 15, y: e.y + 4, vx: Math.sign(dxp) * rnd(3.4, 4.6), vy: rnd(-7.5, -6), arc: true }); }
+    } else if (e.type === "drone") {
+      e.x -= e.speed; e.y = e.baseY + Math.sin(e.t * 0.06) * 26;
+      if (e.x < cam - 60) { enemies.splice(ai, 1); continue; }
+      if (e.fireCd-- <= 0 && adx < 430 && !P.dead) { e.fireCd = irnd(120, 200); var ang = Math.atan2((P.y + 24) - e.y, (P.x + 15) - e.x); ebullets.push({ x: e.x + 19, y: e.y + 18, vx: Math.cos(ang) * 4.2, vy: Math.sin(ang) * 4.2 }); }
+    } else if (e.type === "turret") {
+      if (e.fireCd-- <= 0 && adx < 560 && !P.dead) { e.fireCd = irnd(85, 130); for (var tb = -1; tb <= 1; tb++) ebullets.push({ x: e.x + 20, y: e.y + 14, vx: Math.sign(dxp) * 5, vy: tb * 0.8 }); SFX.big(); }
+    }
+    if (!P.dead && P.inv <= 0 && hit(e, P)) hurtPlayer(1);
+  }
+
+  /* ---- boss AI ---- */
+  if (boss && !boss.dead) {
+    var bs = boss; bs.t++;
+    if (bs.flash > 0) bs.flash--;
+    var arenaX = STAGES[stageIdx].len - bs.w - 90;
+    if (bs.x > arenaX) bs.x += bs.vx; else {
+      bs.x = arenaX + Math.sin(bs.t * 0.008) * 26;
+      if (bs.hp < bs.maxHp * 0.45) bs.phase = 2;
+      if (bs.fireCd-- <= 0 && !P.dead) {
+        bs.fireCd = bs.phase === 2 ? irnd(52, 80) : irnd(80, 115);
+        var bang = Math.atan2((P.y + 20) - (bs.y + 34), (P.x + 15) - (bs.x + 26));
+        ebullets.push({ x: bs.x + 26, y: bs.y + 34, vx: Math.cos(bang) * 5.4, vy: Math.sin(bang) * 5.4 });
+        ebullets.push({ x: bs.x + 130, y: bs.y + 8, vx: -3.2, vy: 1.4 });
+        if (bs.phase === 2) ebullets.push({ x: bs.x + 26, y: bs.y + 34, vx: Math.cos(bang + 0.22) * 5.4, vy: Math.sin(bang + 0.22) * 5.4 });
+        SFX.big();
+      }
+      if (bs.spawnCd-- <= 0 && enemies.length < 3) { bs.spawnCd = irnd(360, 540); spawnEnemy("grunt", bs.x - 70); popup(bs.x - 40, GROUND - 90, "Backup incoming!", "#ff8a7a"); }
+    }
+    if (!P.dead && P.inv <= 0 && hit(bs, P)) hurtPlayer(1);
+  }
+
+  /* ---- pickups ---- */
+  for (var pi = pickups.length - 1; pi >= 0; pi--) {
+    var pk = pickups[pi]; pk.t++;
+    pk.vy += 0.4; pk.x += pk.vx; pk.y += pk.vy;
+    if (pk.y > GROUND - 26) { pk.y = GROUND - 26; pk.vy = 0; pk.vx = 0; }
+    if (!P.dead && hit(pk, P)) {
+      if (pk.kind === "medkit") { P.hp = Math.min(P.maxHp, P.hp + 2); popup(P.x + 15, P.y - 18, "+Health ❤", "#7dff8a"); }
+      else if (pk.kind === "grenade") { P.grenades += 3; popup(P.x + 15, P.y - 18, "+3 Grenades 💣", "#ffd23e"); }
+      else { P.weapon = pk.kind; P.weaponT = 60 * 18; popup(P.x + 15, P.y - 18, WEAPONS[pk.kind].label + "!", "#3ee6c4"); }
+      SFX.pickup(); score += 50;
+      burst(pk.x + 13, pk.y + 13, 10, ["#ffffff", "#ffd23e"], 2.6, 20, 0.05);
+      pickups.splice(pi, 1);
+    } else if (pk.t > 60 * 14) pickups.splice(pi, 1);
+  }
+  for (var ci2 = 0; ci2 < cages.length; ci2++) if (cages[ci2].flash > 0) cages[ci2].flash--;
+
+  /* fx decay */
+  for (var fi = parts.length - 1; fi >= 0; fi--) {
+    var pt = parts[fi]; pt.life--;
+    if (pt.ring) { pt.r += pt.vr; } else { pt.x += pt.vx; pt.y += pt.vy; pt.vy += pt.grav || 0; }
+    if (pt.life <= 0) parts.splice(fi, 1);
+  }
+  for (var si = shellsFx.length - 1; si >= 0; si--) {
+    var sh = shellsFx[si]; sh.life--; sh.vy += 0.5; sh.x += sh.vx; sh.y += sh.vy; sh.rot += 0.3;
+    if (sh.y > GROUND - 3) { sh.y = GROUND - 3; sh.vy = 0; }
+    if (sh.life <= 0) shellsFx.splice(si, 1);
+  }
+  for (var ui = popups.length - 1; ui >= 0; ui--) {
+    var pu = popups[ui];
+    pu.y += pu.screen ? 0 : pu.vy;
+    pu.life--; if (pu.life <= 0) popups.splice(ui, 1);
+  }
+  if (shake > 0) shake *= 0.86; if (shake < 0.3) shake = 0;
+  if (flashT > 0) flashT--;
+}
+
+/* ---------------- DRAW ---------------- */
+function R(x, y, w, h, c) { ctx.fillStyle = c; ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h)); }
+
+/* DLICOM's real logo (from dlicom.io/logo.svg): white swoosh mark, viewBox 40x25 */
+var LOGO_P2D = [
+  "M39.3884 2.03184C40.4043 1.56394 40.0802 0 38.967 0H19.9199C14.4163 0 9.78699 3.85968 8.44412 9.09388H8.45669C8.29474 9.71071 8.1768 10.3454 8.10919 10.9962C8.06988 11.3993 8.04944 11.8073 8.04944 12.2218V12.6443C8.08246 13.8764 8.29002 15.0631 8.65012 16.1803L11.6661 14.7911L14.1599 13.6433L13.0152 12.4646L19.9921 5.28115L23.8023 9.20397L25.5209 8.41229L30.3593 6.18455L39.3869 2.0286L39.3884 2.03184Z",
+  "M19.9903 8.02686L15.6819 12.4629L16.001 12.7932L21.9559 10.0522L19.9903 8.02686Z",
+  "M0.611931 22.9281C-0.403873 23.3961 -0.0799483 24.96 1.03335 24.96H20.0805C25.5856 24.96 30.215 21.1003 31.5563 15.8661H31.5436C31.7056 15.2492 31.8236 14.6146 31.8911 13.9638C31.9305 13.5607 31.9508 13.1527 31.9508 12.7382V12.3157C31.9178 11.0836 31.7104 9.8969 31.3502 8.77979L28.3342 10.1689L25.8404 11.3167L26.985 12.4954L20.0082 19.6788L16.198 15.756L14.4794 16.5477L9.64095 18.7754L0.611931 22.9281Z",
+  "M20.0069 16.9274L24.3155 12.4914L23.9947 12.1611L18.0414 14.9021L20.0069 16.9274Z",
+  "M19.9904 8.03271L15.6819 12.4688L19.9904 16.9049L24.299 12.4688L19.9904 8.03271Z"
+].map(function (d) { return new Path2D(d); });
+function drawLogo(x, y, w, color) {
+  var s = w / 40;
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+  ctx.fillStyle = color || "#ffffff";
+  for (var i = 0; i < LOGO_P2D.length; i++) ctx.fill(LOGO_P2D[i]);
+  ctx.restore();
+}
+
+function drawBackground(st) {
+  var g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, st.sky[0]); g.addColorStop(0.55, st.sky[1]); g.addColorStop(1, st.sky[2]);
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  /* sun / moon */
+  ctx.fillStyle = st.name === "harbor" ? "#cfe8ff" : "#ffe9a8";
+  ctx.beginPath(); ctx.arc(790 - (cam * 0.02 % 60), st.name === "harbor" ? 74 : 96, st.name === "harbor" ? 26 : 38, 0, 7); ctx.fill();
+  /* far hills */
+  ctx.fillStyle = st.hill;
+  ctx.beginPath(); ctx.moveTo(0, GROUND);
+  for (var x = 0; x <= W; x += 40) ctx.lineTo(x, GROUND - 120 - Math.sin((x + cam * 0.25) * 0.006) * 55 - Math.sin((x + cam * 0.25) * 0.017) * 22);
+  ctx.lineTo(W, GROUND); ctx.fill();
+  /* near silhouettes */
+  ctx.fillStyle = st.hill2;
+  var off = -(cam * 0.55 % 240);
+  for (var bx = off - 240; bx < W + 240; bx += 240) {
+    if (st.name === "jungle") { R(bx + 30, GROUND - 150, 16, 150, st.hill2); R(bx + 8, GROUND - 168, 60, 26, st.hill2); R(bx + 130, GROUND - 105, 12, 105, st.hill2); R(bx + 112, GROUND - 122, 48, 22, st.hill2); }
+    else if (st.name === "desert") { R(bx + 40, GROUND - 90, 90, 90, st.hill2); R(bx + 62, GROUND - 118, 46, 30, st.hill2); R(bx + 170, GROUND - 64, 10, 64, st.hill2); R(bx + 158, GROUND - 74, 34, 14, st.hill2); }
+    else { R(bx + 20, GROUND - 130, 54, 130, st.hill2); R(bx + 34, GROUND - 152, 26, 24, st.hill2); R(bx + 130, GROUND - 84, 70, 84, st.hill2); R(bx + 196, GROUND - 108, 8, 108, st.hill2); }
+  }
+  /* DLICOM billboards along the stage — the logo lives in the world too */
+  var boff = -(cam % 700);
+  for (var bsx = boff - 700; bsx < W + 700; bsx += 700) {
+    R(bsx + 62, GROUND - 116, 7, 116, "rgba(0,0,0,.35)");
+    R(bsx + 8, GROUND - 170, 122, 56, "#0b1e4b");
+    ctx.strokeStyle = "#2f7bff"; ctx.lineWidth = 3; ctx.strokeRect(bsx + 8, GROUND - 170, 122, 56);
+    drawLogo(bsx + 15, GROUND - 153, 36, "#ffffff");
+    ctx.fillStyle = "#ffffff"; ctx.font = "900 14px 'Trebuchet MS','Nirmala UI',sans-serif"; ctx.textAlign = "left";
+    ctx.fillText("DLICOM", bsx + 58, GROUND - 137);
+  }
+  /* ground */
+  R(0, GROUND, W, H - GROUND, st.ground);
+  R(0, GROUND, W, 8, st.groundTop);
+  ctx.fillStyle = "rgba(0,0,0,0.18)";
+  var goff = -(cam % 46);
+  for (var gx = goff; gx < W; gx += 46) ctx.fillRect(gx, GROUND + 22 + ((gx * 7) % 30), 22, 5);
+  if (st.name === "harbor") { ctx.fillStyle = "rgba(62,230,196,0.5)"; for (var wx = goff; wx < W; wx += 92) ctx.fillRect(wx, GROUND + 46, 30, 3); }
+}
+
+function drawDili() {
+  if (P.dead && P.deadT > 8) return;
+  if (P.inv > 0 && Math.floor(stageTime / 4) % 2 === 0 && !P.dead) ctx.globalAlpha = 0.35;
+  var x = P.x - cam, y = P.y, f = P.face;
+  ctx.save(); ctx.translate(Math.round(x + 15), Math.round(y)); ctx.scale(f, 1); ctx.translate(-15, 0);
+  var run = P.onGround && P.vx !== 0, ph = run ? Math.sin(P.runT * 6) : 0;
+  var legA = run ? ph * 6 : 0, legB = run ? -ph * 6 : 0;
+  var bob = (run ? Math.abs(Math.sin(P.runT * 6)) * 2 : Math.sin(stageTime * 0.08) * 1) - (P.crouch ? 5 : 0);
+  var hurt = P.hurtT > 0;
+  var suit = hurt ? "#ff8a7a" : "#2f7bff", suitD = hurt ? "#e56a5a" : "#1e6fe8", suitL = "#4db2ff";
+  /* cape — Dili's dark-blue cape flowing behind */
+  ctx.fillStyle = "#1d4ed8";
+  ctx.beginPath();
+  ctx.moveTo(7, 15 - bob);
+  ctx.lineTo(-6 - Math.sin(stageTime * 0.12) * 2, 28 - bob);
+  ctx.lineTo(-4, 46 - bob); ctx.lineTo(9, 42 - bob); ctx.closePath(); ctx.fill();
+  /* legs: blue suit + WHITE boots */
+  R(8 + legA, 38 - bob, 7, 9, suitD); R(6 + legA, 46 - bob, 12, 6, "#ffffff"); R(6 + legA, 50 - bob, 12, 2, "#b9cdec");
+  R(17 + legB, 38 - bob, 7, 9, suitD); R(15 + legB, 46 - bob, 12, 6, "#ffffff"); R(15 + legB, 50 - bob, 12, 2, "#b9cdec");
+  /* torso: blue suit with the big white D */
+  R(5, 19 - bob, 22, 21, suit);
+  R(5, 19 - bob, 22, 5, suitL);
+  R(5, 36 - bob, 22, 4, suitD);
+  ctx.fillStyle = "#ffffff"; ctx.font = "900 15px 'Trebuchet MS','Nirmala UI',sans-serif"; ctx.textAlign = "center";
+  ctx.fillText("D", 16, 34 - bob);
+  /* back arm */
+  R(1, 24 - bob, 6, 11, suitD); R(1, 33 - bob, 6, 5, suitL);
+  /* head: blue SPEECH BUBBLE (rounded bubble + tail) */
+  var hg = ctx.createLinearGradient(0, -5 - bob, 0, 19 - bob);
+  hg.addColorStop(0, "#4db2ff"); hg.addColorStop(1, "#1e6fe8");
+  ctx.fillStyle = hurt ? "#ff8a7a" : hg;
+  ctx.beginPath();
+  var bx = 2, by = -4 - bob, bw = 26, bh = 22, br = 7;
+  ctx.moveTo(bx + br, by); ctx.lineTo(bx + bw - br, by); ctx.arcTo(bx + bw, by, bx + bw, by + br, br);
+  ctx.lineTo(bx + bw, by + bh - br); ctx.arcTo(bx + bw, by + bh, bx + bw - br, by + bh, br);
+  ctx.lineTo(bx + br, by + bh); ctx.arcTo(bx, by + bh, bx, by + bh - br, br);
+  ctx.lineTo(bx, by + br); ctx.arcTo(bx, by, bx + br, by, br); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(9, 16 - bob); ctx.lineTo(18, 16 - bob); ctx.lineTo(10, 24 - bob); ctx.closePath(); ctx.fill();
+  /* diamond eyes */
+  ctx.fillStyle = "#eaf7ff";
+  [[10, 5], [20, 5]].forEach(function (e2) {
+    ctx.beginPath(); ctx.moveTo(e2[0], e2[1] - 4 - bob); ctx.lineTo(e2[0] + 3.4, e2[1] - bob); ctx.lineTo(e2[0], e2[1] + 4 - bob); ctx.lineTo(e2[0] - 3.4, e2[1] - bob); ctx.closePath(); ctx.fill();
+  });
+  /* smile + pink cheeks */
+  ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 2; ctx.beginPath();
+  ctx.arc(15, 9 - bob, 5, Math.PI * 0.2, Math.PI * 0.8); ctx.stroke();
+  ctx.fillStyle = "rgba(255,143,184,.7)";
+  ctx.beginPath(); ctx.arc(6, 11 - bob, 2.2, 0, 7); ctx.fill();
+  ctx.beginPath(); ctx.arc(24, 11 - bob, 2.2, 0, 7); ctx.fill();
+  /* bubble helmet over the head */
+  ctx.fillStyle = "rgba(170,215,255,.10)";
+  ctx.strokeStyle = "rgba(255,255,255,.8)"; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(15, 6 - bob, 17, 0, 7); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = "rgba(255,255,255,.5)";
+  ctx.beginPath(); ctx.ellipse(9, -4 - bob, 5, 2.3, -0.6, 0, 7); ctx.fill();
+  /* arms + gun */
+  var up = P.aimUp, rec = P.muzzle > 0 ? -2 : 0;
+  if (up) {
+    R(18, 2 - bob, 6, 16, suit);
+    R(16, -14 - bob, 9, 18, "#2b2f3a"); R(18, -20 - bob, 5, 8, "#ffd23e");
+    if (P.muzzle > 0) { ctx.fillStyle = "#ffe9a8"; ctx.beginPath(); ctx.arc(20, -26 - bob, 8, 0, 7); ctx.fill(); R(18, -34 - bob, 4, 9, "#ff9d2e"); }
+  } else {
+    R(20, 24 - bob, 7, 10, suit);
+    var gl = P.weapon === "rocket" ? 30 : P.weapon === "spread" ? 24 : 20;
+    R(22 + rec, 20 - bob, gl, 8, "#2b2f3a"); R(22 + rec, 23 - bob, gl, 2, "#4a5064");
+    R(26 + rec, 15 - bob, 6, 6, "#2b2f3a");
+    if (P.weapon === "rocket") { R(22 + rec, 17 - bob, 30, 12, "#3f7a3a"); R(48 + rec, 19 - bob, 6, 8, "#e2543e"); }
+    if (P.weapon === "spread") { R(42 + rec, 19 - bob, 5, 4, "#2b2f3a"); R(42 + rec, 25 - bob, 5, 4, "#2b2f3a"); }
+    if (P.muzzle > 0) { ctx.fillStyle = "#ffe9a8"; ctx.beginPath(); ctx.arc(26 + rec + gl + 6, 24 - bob, 8, 0, 7); ctx.fill(); R(26 + rec + gl + 2, 22 - bob, 12, 4, "#ff9d2e"); }
+  }
+  ctx.restore();
+  ctx.globalAlpha = 1;
+}
+
+function drawEnemy(e) {
+  var x = e.x - cam, y = e.y;
+  if (x < -80 || x > W + 80) return;
+  var fl = e.flash > 0;
+  if (e.type === "drone") {
+    R(x + 4, y + 6, 30, 12, fl ? "#fff" : "#5a4a8a");
+    R(x + 12, y + 1, 14, 7, fl ? "#fff" : "#8a76c9");
+    R(x + 16, y + 8, 6, 5, "#ff5c5c");
+    var rp = Math.floor(stageTime / 2) % 2;
+    R(x - 3, y + 8, 6, 3, rp ? "#cfd6ff" : "#8a93c9"); R(x + 35, y + 8, 6, 3, rp ? "#8a93c9" : "#cfd6ff");
+    R(x + 8, y + 18, 4, 5, "#3a3a4a"); R(x + 26, y + 18, 4, 5, "#3a3a4a");
+    return;
+  }
+  if (e.type === "turret") {
+    R(x + 2, y + 26, 36, 18, fl ? "#fff" : "#4a4f63");
+    R(x + 8, y + 12, 24, 16, fl ? "#fff" : "#626a85");
+    var dir = P.x > e.x ? 1 : -1;
+    R(x + 20 + (dir > 0 ? 8 : -22), y + 16, 22, 6, "#2b2f3a");
+    R(x + 16, y + 4, 8, 9, "#ff5c5c"); if (Math.floor(stageTime / 20) % 2) R(x + 18, y + 6, 4, 4, "#ffd23e");
+    return;
+  }
+  /* humanoid goons */
+  var body = e.type === "shield" ? "#7a4a2b" : e.type === "grenadier" ? "#5c6e3a" : "#6e3b8a";
+  var legPh = Math.sin(e.t * 0.22) * 4;
+  R(x + 7, y + 30, 6, 12, "#2b2f3a"); R(x + 7 + legPh, y + 40, 8, 5, "#1c1c26");
+  R(x + 18, y + 30, 6, 12, "#2b2f3a"); R(x + 18 - legPh, y + 40, 8, 5, "#1c1c26");
+  R(x + 5, y + 14, 22, 18, fl ? "#fff" : body);
+  R(x + 6, y + 2, 18, 13, fl ? "#fff" : "#d9a066");        /* head */
+  R(x + 5, y + 0, 20, 6, e.type === "grenadier" ? "#3a4a22" : "#3a2b55"); /* cap */
+  R(x + 8, y + 8, 13, 3, "#14141f");                        /* visor */
+  if (e.type === "grenadier") { R(x + 22, y + 10, 8, 10, "#42532c"); R(x + 24, y + 6, 5, 5, "#7dff8a"); }
+  else R(x + (P.x > e.x ? 20 : -8), y + 18, 16, 5, "#2b2f3a"); /* gun */
+  if (e.type === "shield") {
+    R(x + (P.x > e.x ? 26 : -6), y + 10, 8, 30, fl ? "#fff" : "#9fb6d9");
+    R(x + (P.x > e.x ? 28 : -4), y + 16, 4, 8, "#e2543e");
+  }
+  /* hp pips */
+  if (e.hp < e.maxHp) {
+    R(x, y - 8, e.w, 4, "rgba(0,0,0,.45)");
+    R(x, y - 8, e.w * clamp(e.hp / e.maxHp, 0, 1), 4, "#7dff8a");
+  }
+}
+
+function drawBoss() {
+  if (!boss) return;
+  var b = boss, x = b.x - cam, y = b.y, fl = b.flash > 0;
+  /* treads */
+  R(x + 8, y + 92, 174, 26, fl ? "#fff" : "#23232e");
+  ctx.fillStyle = "#4a4f63";
+  for (var i = 0; i < 6; i++) { ctx.beginPath(); ctx.arc(x + 28 + i * 28, y + 105, 10, 0, 7); ctx.fill(); }
+  /* hull */
+  R(x + 18, y + 52, 154, 44, fl ? "#fff" : "#5c6650");
+  R(x + 18, y + 52, 154, 10, fl ? "#fff" : "#74806a");
+  R(x + 30, y + 66, 60, 18, "#39402f");
+  R(x + 120, y + 62, 34, 22, "#e2543e"); R(x + 130, y + 68, 14, 10, "#ffd23e"); /* core */
+  /* turret + cannon aimed at player */
+  R(x + 6, y + 26, 52, 30, fl ? "#fff" : "#4c5545");
+  var ang = Math.atan2((P.y + 20) - (y + 34), (P.x + 15) - (x + 26));
+  ctx.save(); ctx.translate(x + 26, y + 34); ctx.rotate(ang);
+  R(-6, -6, 52, 12, "#2b2f3a"); R(38, -8, 14, 16, "#1c1c26"); ctx.restore();
+  /* top launcher + antenna */
+  R(x + 118, y + 18, 40, 16, fl ? "#fff" : "#4c5545"); R(x + 148, y + 8, 8, 12, "#2b2f3a");
+  R(x + 168, y - 14, 3, 34, "#9fb6d9"); R(x + 165, y - 18, 9, 8, Math.floor(stageTime / 18) % 2 ? "#ff5c5c" : "#7a2020");
+  /* crab claw on stage 3 */
+  if (stageIdx === 2) { R(x - 14, y + 60, 26, 12, "#8a4a6e"); R(x - 20, y + 48, 14, 14, "#a85a86"); R(x - 20, y + 70, 14, 12, "#a85a86"); }
+  /* boss HP bar */
+  R(x + 10, y - 34, 170, 10, "rgba(0,0,0,.5)");
+  R(x + 10, y - 34, 170 * clamp(b.hp / b.maxHp, 0, 1), 10, b.phase === 2 ? "#ff5c5c" : "#ffb35c");
+  ctx.fillStyle = "#fff"; ctx.font = "bold 11px Trebuchet MS, sans-serif"; ctx.textAlign = "center";
+  ctx.fillText(b.name, x + 95, y - 40);
+}
+
+function drawCage(c) {
+  var x = c.x - cam, y = c.y;
+  if (c.freed) {
+    R(x + 2, y + 44, 36, 14, "#6b7280"); R(x + 2, y + 44, 36, 4, "#9aa3b2");
+    return;
+  }
+  /* POW inside */
+  var bob = Math.sin(stageTime * 0.1 + c.x) * 1.5;
+  R(x + 14, y + 30 + bob, 12, 16, "#2f7bff");
+  drawLogo(x + 15, y + 34 + bob, 10, "#ffffff");
+  R(x + 13, y + 18 + bob, 14, 13, "#e8b98a");
+  R(x + 12, y + 15 + bob, 16, 5, "#3a6ea5");
+  if (Math.floor(stageTime / 30) % 2) { ctx.fillStyle = "#fff"; ctx.font = "bold 11px 'Trebuchet MS','Nirmala UI',sans-serif"; ctx.textAlign = "center"; ctx.fillText("HELP!", x + 20, y + 8); }
+  /* bars */
+  ctx.fillStyle = c.flash > 0 ? "#fff" : "#8a93a8";
+  for (var i = 0; i < 5; i++) ctx.fillRect(x + 2 + i * 9, y + 4, 4, 54);
+  R(x, y + 2, 40, 5, c.flash > 0 ? "#fff" : "#6b7280"); R(x, y + 52, 40, 6, c.flash > 0 ? "#fff" : "#6b7280");
+}
+
+function drawPickup(pk) {
+  var x = pk.x - cam, y = pk.y + Math.sin(pk.t * 0.12) * 2;
+  var colors = { mg: "#ffb35c", spread: "#3ee6c4", rocket: "#7dff8a", medkit: "#ff8a7a", grenade: "#ffd23e" };
+  R(x - 2, y - 2, 30, 30, "rgba(0,0,0,.35)");
+  R(x, y, 26, 26, colors[pk.kind]);
+  ctx.fillStyle = "#14141f"; ctx.font = "900 15px Trebuchet MS"; ctx.textAlign = "center";
+  ctx.fillText({ mg: "M", spread: "S", rocket: "R", medkit: "+", grenade: "G" }[pk.kind], x + 13, y + 19);
+}
+
+function drawHUD() {
+  /* DLICOM real logo, top-left */
+  drawLogo(8, 14, 34, "#ffffff");
+  ctx.fillStyle = "#fff"; ctx.font = "900 11px 'Trebuchet MS','Nirmala UI',sans-serif"; ctx.textAlign = "left";
+  ctx.fillText("DLICOM", 48, 28);
+  /* hearts */
+  for (var i = 0; i < P.maxHp; i++) {
+    ctx.fillStyle = i < P.hp ? "#ff5c7a" : "rgba(255,255,255,.22)";
+    ctx.font = "22px sans-serif"; ctx.textAlign = "left";
+    ctx.fillText("♥", 130 + i * 26, 34);
+  }
+  /* score + streak */
+  ctx.fillStyle = "#fff"; ctx.font = "900 20px 'Trebuchet MS','Nirmala UI',sans-serif"; ctx.textAlign = "left";
+  ctx.fillText("Score " + score, 16, 62);
+  var m = streakMult();
+  if (P.streak >= 3) {
+    ctx.fillStyle = m >= 3 ? "#ff5c5c" : m === 2 ? "#ff9d2e" : "#ffd23e";
+    ctx.font = "900 17px 'Trebuchet MS','Nirmala UI',sans-serif";
+    ctx.fillText("🔥 Streak ×" + m + "  (" + P.streak + ")", 16, 86);
+  }
+  /* weapon + grenades */
+  ctx.textAlign = "right"; ctx.fillStyle = "#dfe5ff"; ctx.font = "800 15px 'Trebuchet MS','Nirmala UI',sans-serif";
+  var wtxt = WEAPONS[P.weapon].label + (P.weapon !== "pistol" ? "  " + Math.ceil(P.weaponT / 60) + "s" : "");
+  ctx.fillText("🔫 " + wtxt, W - 16, 30);
+  ctx.fillText("💣 × " + P.grenades, W - 16, 54);
+  ctx.fillStyle = "#aab4e8"; ctx.font = "700 13px 'Trebuchet MS','Nirmala UI',sans-serif";
+  ctx.fillText(STAGE_INTROS[stageIdx], W - 16, 76);
+  /* progress bar */
+  var st = STAGES[stageIdx];
+  R(330, 14, 300, 7, "rgba(0,0,0,.4)");
+  R(330, 14, 300 * clamp(P.x / st.len, 0, 1), 7, "#3ee6c4");
+  R(330 + 300 * clamp(P.x / st.len, 0, 1) - 4, 11, 9, 13, "#ffd23e");
+}
+
+function render() {
+  var st = STAGES[stageIdx];
+  ctx.save();
+  if (shake > 0.4) ctx.translate(rnd(-shake, shake) * 0.5, rnd(-shake, shake) * 0.5);
+  drawBackground(st);
+  for (var i = 0; i < cages.length; i++) drawCage(cages[i]);
+  for (var j = 0; j < pickups.length; j++) drawPickup(pickups[j]);
+  for (var k = 0; k < enemies.length; k++) drawEnemy(enemies[k]);
+  drawBoss();
+  /* grenades */
+  for (var gi = 0; gi < grenades.length; gi++) { var g = grenades[gi]; R(g.x - cam, g.y, 10, 10, "#3a4a22"); R(g.x - cam + 3, g.y - 3, 4, 4, "#9aa3b2"); }
+  /* enemy bullets */
+  for (var qi = 0; qi < ebullets.length; qi++) { var q = ebullets[qi]; ctx.fillStyle = q.arc ? "#7dff8a" : "#ff8a7a"; ctx.beginPath(); ctx.arc(q.x - cam, q.y, q.arc ? 5 : 4, 0, 7); ctx.fill(); }
+  /* player bullets */
+  for (var bi = 0; bi < bullets.length; bi++) {
+    var b = bullets[bi];
+    if (b.rocket) { R(b.x - cam, b.y, 14, 7, "#d9d9e3"); R(b.x - cam + 10, b.y + 1, 5, 5, "#e2543e"); }
+    else { ctx.fillStyle = "#ffe9a8"; ctx.fillRect(b.x - cam, b.y, Math.abs(b.vx) > Math.abs(b.vy) ? 9 : 3, Math.abs(b.vx) > Math.abs(b.vy) ? 3 : 9); }
+  }
+  /* shells */
+  for (var si = 0; si < shellsFx.length; si++) { var sh = shellsFx[si]; ctx.save(); ctx.translate(sh.x - cam, sh.y); ctx.rotate(sh.rot); R(-3, -1, 6, 3, "#ffd23e"); ctx.restore(); }
+  if (P && state !== "title") drawDili();
+  /* particles */
+  for (var pi = 0; pi < parts.length; pi++) {
+    var pt = parts[pi];
+    if (pt.ring) { ctx.strokeStyle = pt.c; ctx.globalAlpha = pt.life / pt.max; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(pt.x - cam, pt.y, pt.r, 0, 7); ctx.stroke(); ctx.globalAlpha = 1; }
+    else { ctx.globalAlpha = clamp(pt.life / pt.max, 0, 1); R(pt.x - cam, pt.y, pt.size, pt.size, pt.c); ctx.globalAlpha = 1; }
+  }
+  /* popups */
+  ctx.textAlign = "center";
+  for (var ui = 0; ui < popups.length; ui++) {
+    var pu = popups[ui];
+    ctx.globalAlpha = clamp(pu.life / 40, 0, 1);
+    ctx.font = (pu.txt.length > 14 ? "900 21px" : "900 15px") + " 'Trebuchet MS','Nirmala UI',sans-serif";
+    ctx.fillStyle = pu.c; ctx.strokeStyle = "rgba(0,0,0,.6)"; ctx.lineWidth = 4;
+    var px = pu.screen ? pu.x : pu.x - cam;
+    ctx.strokeText(pu.txt, px, pu.y); ctx.fillText(pu.txt, px, pu.y);
+    ctx.globalAlpha = 1;
+  }
+  ctx.restore();
+  if (flashT > 0) { ctx.fillStyle = "rgba(255,240,200," + (flashT / 10 * 0.5) + ")"; ctx.fillRect(0, 0, W, H); }
+  if (state === "play" || state === "stageclear") drawHUD();
+  if (paused && state === "play") {
+    ctx.fillStyle = "rgba(8,10,24,.6)"; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = "#ffd23e"; ctx.font = "900 40px 'Trebuchet MS','Nirmala UI',sans-serif"; ctx.textAlign = "center";
+    ctx.fillText("⏸ Paused", W / 2, H / 2);
+    ctx.fillStyle = "#dfe5ff"; ctx.font = "700 16px 'Trebuchet MS','Nirmala UI',sans-serif";
+    ctx.fillText("Press the Pause button or P to resume", W / 2, H / 2 + 34);
+  }
+  if (state === "stageclear") {
+    ctx.fillStyle = "rgba(8,10,24,.55)"; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = "#ffd23e"; ctx.font = "900 44px 'Trebuchet MS','Nirmala UI',sans-serif"; ctx.textAlign = "center";
+    ctx.fillText("Stage Clear! 🎉", W / 2, H / 2 - 20);
+    ctx.fillStyle = "#fff"; ctx.font = "800 19px 'Trebuchet MS','Nirmala UI',sans-serif";
+    ctx.fillText("Score: " + score + " — Next stage incoming…", W / 2, H / 2 + 18);
+    ctx.fillStyle = "#ffb3c8"; ctx.font = "italic 16px 'Trebuchet MS','Nirmala UI',sans-serif";
+    ctx.fillText("“" + QUIPS[stageIdx % QUIPS.length] + "”", W / 2, H / 2 + 50);
+  }
+  if (state === "title") {
+    /* idle backdrop: Dili standing guard */
+    drawBackground(STAGES[0]);
+    ctx.save(); ctx.translate(0, 0);
+    var saveP = P; P = newPlayer(); P.x = 430; P.y = GROUND - 52; P.weapon = "spread";
+    var saveCam = cam; cam = 0; var saveT = stageTime; stageTime = Math.floor(performance.now() / 16);
+    drawDili();
+    P = saveP; cam = saveCam; stageTime = saveT;
+    ctx.restore();
+  }
+}
+
+/* ---------------- MAIN LOOP ---------------- */
+var lastT = 0, acc = 0;
+function frame(ts) {
+  requestAnimationFrame(frame);
+  if (!lastT) lastT = ts;
+  var dt = Math.min(50, ts - lastT); lastT = ts; acc += dt;
+  var stepMs = 1000 / 60;
+  while (acc >= stepMs) {
+    acc -= stepMs;
+    if (hitStop > 0) { hitStop--; continue; }
+    if (slowMo > 0) { slowMo--; if (slowMo % 3 !== 0) continue; }
+    if (state === "stageclear") {
+      clearTimer++;
+      if (clearTimer > 150) { loadStage(stageIdx + 1); }
+    }
+    update();
+  }
+  render();
+}
+
+/* ---------------- UI wiring ---------------- */
+P = newPlayer();
+document.getElementById("startBtn").addEventListener("click", function () {
+  audio(); startMusic(); playJingle();
+  document.getElementById("titleScreen").classList.add("hidden");
+  document.getElementById("endScreen").classList.add("hidden");
+  resetRun();
+  window.__gameBooted = true;
+  this.blur(); focusGame();
+});
+document.getElementById("againBtn").addEventListener("click", function () {
+  audio(); startMusic(); playJingle();
+  document.getElementById("endScreen").classList.add("hidden");
+  resetRun();
+  this.blur(); focusGame();
+});
+function syncMuteBtn() {
+  var b = document.getElementById("muteBtn");
+  b.textContent = muted ? "🔇 Muted" : "🔊 Sound";
+  b.classList.toggle("on", !muted);
+}
+function toggleMute() {
+  muted = !muted; syncMuteBtn();
+  if (!muted) { audio(); playJingle(); }
+}
+document.getElementById("muteBtn").addEventListener("click", function () { toggleMute(); this.blur(); focusGame(); });
+function syncPauseBtn() {
+  document.getElementById("pauseBtn").textContent = paused ? "▶ Resume" : "⏸ Pause";
+}
+function togglePause() { if (state === "play") { paused = !paused; syncPauseBtn(); } }
+document.getElementById("pauseBtn").addEventListener("click", function () { togglePause(); this.blur(); focusGame(); });
+document.getElementById("reloadBtn").addEventListener("click", function () { location.reload(); });
+/* ---------- fullscreen: native first, CSS fallback if the browser/frame refuses ---------- */
+var fsBtn = document.getElementById("fsBtn");
+var pseudoFs = false;
+function inFs() { return !!(document.fullscreenElement || document.webkitFullscreenElement) || pseudoFs; }
+function applyFsClass() {
+  if (document.fullscreenElement || document.webkitFullscreenElement) pseudoFs = false; /* native wins */
+  var on = !!(document.fullscreenElement || document.webkitFullscreenElement) || pseudoFs;
+  document.body.classList.toggle("fs", on);
+  document.body.classList.toggle("pseudo-fs", pseudoFs && !document.fullscreenElement);
+  fsBtn.textContent = on ? "⛶ Exit Full" : "⛶ Full screen";
+}
+function setPseudoFs(on) { pseudoFs = on; applyFsClass(); focusGame(); }
+function toggleFullscreen() {
+  if (pseudoFs) { setPseudoFs(false); focusGame(); return; }
+  try {
+    if (document.fullscreenElement || document.webkitFullscreenElement) {
+      var ex = document.exitFullscreen || document.webkitExitFullscreen;
+      if (ex) { var xp = ex.call(document); if (xp && xp.catch) xp.catch(function () { applyFsClass(); }); }
+      setTimeout(applyFsClass, 60);
+    } else {
+      var el = document.getElementById("wrap");
+      var req = el.requestFullscreen || el.webkitRequestFullscreen;
+      if (req) {
+        var p = req.call(el);
+        if (p && p.catch) p.catch(function () { setPseudoFs(true); });
+        /* if the frame silently ignores the request, fall back after a beat */
+        setTimeout(function () { if (!document.fullscreenElement && !document.webkitFullscreenElement && !pseudoFs) setPseudoFs(true); }, 400);
+      } else setPseudoFs(true);
+    }
+  } catch (err) { setPseudoFs(true); }
+  focusGame();
+}
+fsBtn.addEventListener("click", function () { toggleFullscreen(); this.blur(); });
+document.addEventListener("fullscreenchange", applyFsClass);
+document.addEventListener("webkitfullscreenchange", applyFsClass);
+document.addEventListener("keydown", function (e) {
+  if (e.code === "KeyP") togglePause();
+  if (e.code === "Escape") { if (pseudoFs) setPseudoFs(false); else togglePause(); }
+  if (e.code === "KeyM") toggleMute();
+  if (e.code === "KeyF") toggleFullscreen();
+  if (state === "title" && e.code === "Enter") document.getElementById("startBtn").click();
+  if ((state === "over" || state === "win") && e.code === "Enter") document.getElementById("againBtn").click();
+}, true);
+cv.addEventListener("touchstart", function () { audio(); }, { passive: true });
+cv.addEventListener("mousedown", function () { focusGame(); });
+window.__gameBooted = true;
+focusGame();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
