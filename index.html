@@ -47,16 +47,24 @@
       linear-gradient(180deg, rgba(10,12,28,.18), rgba(10,12,28,.55) 62%, rgba(8,10,24,.88) 100%);
     justify-content: space-between; padding: 16px 26px 14px; gap: 6px; overflow: hidden;
   }
-  .title-top, .title-bottom { display: flex; flex-direction: column; align-items: center; gap: 7px; }
+  .title-top, .title-mid, .title-bottom { display: flex; flex-direction: column; align-items: center; gap: 8px; }
   #titleScreen h1 {
     margin: 0; font-family: "Bungee", "Trebuchet MS", sans-serif; font-weight: 400;
-    font-size: clamp(32px, 5.8vw, 56px); line-height: .98; letter-spacing: 1px;
+    font-size: clamp(38px, 6.6vw, 68px); line-height: .98; letter-spacing: 1px;
     color: #ffd23e; text-shadow: 0 3px 0 #e2543e, 0 6px 0 #7a1f3d, 0 12px 26px rgba(0,0,0,.65);
     transform: rotate(-2deg);
   }
   #titleScreen h1 .brawl { color: #3ee6c4; text-shadow: 0 3px 0 #1d7f74, 0 6px 0 #0d3d4d, 0 12px 26px rgba(0,0,0,.65); }
-  .tagline { margin: 0; font-size: clamp(13px, 2.2vw, 17px); color: #ffe9b0; font-weight: 800; text-shadow: 0 2px 8px rgba(0,0,0,.7); }
-  .sub { margin: 0; max-width: 560px; font-size: clamp(12px, 2vw, 15px); color: #e6ebff; line-height: 1.5; text-shadow: 0 1px 6px rgba(0,0,0,.8); }
+  .hintline {
+    margin: 0; display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; justify-content: center;
+    font-size: clamp(12px, 1.8vw, 14px); font-weight: 800; letter-spacing: .4px; color: #c9d4ff;
+    text-shadow: 0 1px 6px rgba(0,0,0,.85);
+  }
+  .hintline b {
+    color: #fff; background: #232a4d; border: 1px solid #4a5590; border-bottom-width: 3px;
+    border-radius: 6px; padding: 1px 7px; font-size: 12px;
+  }
+  .hintline .dot { color: #5f6ca6; }
   .bigbtn {
     border: 0; cursor: pointer; min-height: 54px; padding: 13px 36px; border-radius: 12px;
     font-family: "Bungee", "Nunito", sans-serif; font-weight: 400; font-size: clamp(16px, 2.4vw, 20px); letter-spacing: .5px;
@@ -68,9 +76,7 @@
   @keyframes startPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.045); } }
   #startBtn:active { animation: none; }
   @media (prefers-reduced-motion: reduce) { #startBtn { animation: none; } }
-  .presshint { margin: 0; font-size: 12px; font-weight: 800; letter-spacing: 2px; color: #8fb8ff; text-transform: uppercase; animation: blinkHint 1.2s steps(2) infinite; }
-  @keyframes blinkHint { 50% { opacity: .35; } }
-  @media (prefers-reduced-motion: reduce) { .presshint { animation: none; } }
+  #titleHelpBtn { min-width: 190px; }
   /* goons peeking in from the edges of the title screen */
   .peek { position: absolute; bottom: 6px; width: clamp(64px, 11vw, 104px); height: auto; opacity: .96; pointer-events: none; filter: drop-shadow(0 6px 10px rgba(0,0,0,.5)); }
   .peek.left { left: 10px; transform: rotate(-4deg); }
@@ -93,12 +99,6 @@
     border: 2px solid #4a5590; cursor: pointer; min-height: 44px; padding: 8px 20px; border-radius: 10px;
     font: inherit; font-weight: 700; font-size: 15px; color: #dfe5ff; background: rgba(20,26,54,.75);
   }
-  .keys {
-    display: flex; flex-wrap: wrap; gap: 6px 14px; justify-content: center;
-    font-size: 12.5px; color: #aab4e8; max-width: 640px;
-  }
-  .keys b { color: #fff; background: #232a4d; border: 1px solid #4a5590; border-bottom-width: 3px;
-    border-radius: 6px; padding: 1px 7px; font-size: 12px; }
   #endScreen { background: rgba(8,10,24,.82); padding: 22px 26px; }
   #endScreen h2 { margin: 0; font-family: "Bungee", sans-serif; font-weight: 400; font-size: clamp(24px, 4.6vw, 40px); color: #ffd23e; text-shadow: 0 3px 0 #7a1f3d; line-height: 1.15; }
   #endStats { font-size: clamp(14px, 2.4vw, 18px); line-height: 1.7; color: #e8ecff; }
@@ -205,13 +205,7 @@
   }
   .helppanel p { margin: 0 0 10px; }
   .helppanel p:last-child { margin-bottom: 0; }
-  /* the controls legend becomes one tidy panel, lifted clear of the ground line */
   #stage { container-type: inline-size; }
-  #titleScreen { padding-bottom: 8.6cqw; }
-  .keys {
-    background: rgba(10,14,34,.78); border: 1.5px solid #3a4a8f; border-radius: 12px;
-    padding: 9px 14px; row-gap: 7px; box-shadow: 0 10px 24px rgba(0,0,0,.45);
-  }
   #errCard {
     position: absolute; inset: 0; z-index: 9; display: none; align-items: center; justify-content: center;
     background: rgba(8,10,24,.92); border-radius: 10px; text-align: center; padding: 20px;
@@ -224,15 +218,10 @@
   .logo-lockup { display: flex; align-items: center; gap: 10px; background: rgba(8,12,30,.55); border-radius: 12px; padding: 6px 14px 6px 8px; }
   .logo-lockup .word { font-weight: 900; letter-spacing: 4px; font-size: clamp(17px, 3vw, 23px); color: #fff; }
   .logo-lockup .word small { display: block; letter-spacing: 1.6px; font-size: 10px; color: #8fb8ff; font-weight: 800; text-align: left; }
-  .hero-dili { width: clamp(100px, 14.5vw, 138px); height: auto; filter: drop-shadow(0 10px 18px rgba(0,0,0,.5)); animation: diliBob 2.6s ease-in-out infinite; }
+  .hero-dili { width: clamp(120px, 16.5vw, 168px); height: auto; filter: drop-shadow(0 10px 18px rgba(0,0,0,.5)); animation: diliBob 2.6s ease-in-out infinite; }
   #titleScreen { gap: 7px; }
   @keyframes diliBob { 0%,100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-7px) rotate(1deg); } }
   @media (prefers-reduced-motion: reduce) { .hero-dili { animation: none; } }
-  #keyStatus {
-    font-size: 12.5px; font-weight: 800; color: #ffe9b0; background: rgba(20,26,54,.8);
-    border: 1.5px dashed #4a5590; border-radius: 999px; padding: 5px 14px; margin: 0;
-  }
-  #keyStatus.on { color: #231303; background: #ffd23e; border-style: solid; border-color: #b97e0e; }
   button:focus-visible, .tbtn:focus-visible { outline: 3px solid #ffd23e; outline-offset: 2px; }
   .iconbtn:hover, .ghostbtn:hover { border-color: #ffd23e; color: #ffd23e; }
   .bigbtn:hover { filter: brightness(1.07); }
@@ -263,16 +252,13 @@
     #stage { width: 100%; max-height: calc(100dvh - 46px); }
     canvas { border-radius: 6px; }
     .screen { gap: 6px; padding: 10px 12px; border-radius: 6px; }
-    #titleScreen { padding: 12px 12px 9.5cqw; }
-    .tagline { display: none; }
-    #titleScreen h1 { font-size: 30px; }
-    .hero-dili { width: 56px; }
+    #titleScreen { padding: 12px; }
+    #titleScreen h1 { font-size: 34px; }
+    .hero-dili { width: 84px; }
     .logo-lockup .word { font-size: 14px; letter-spacing: 2.5px; }
-    #keyStatus { display: none; }
     body.fs #topbar { opacity: .9; }
-    .sub { font-size: 11.5px; line-height: 1.4; max-width: 340px; }
-    .keys { display: none; }
     .bigbtn { min-height: 48px; padding: 10px 24px; font-size: 16px; }
+    .ghostbtn { min-height: 40px; font-size: 13.5px; padding: 7px 16px; }
     #endScreen { padding: 14px; }
     #endScreen h2 { font-size: 21px; }
     #endStats { font-size: 13px; line-height: 1.55; }
@@ -287,20 +273,16 @@
     #touch .cluster { gap: 7px; }
     #touch { padding: 0 8px calc(8px + env(safe-area-inset-bottom)); }
   }
-  @media (max-height: 820px) { #keyStatus { display: none; } }
-  /* portrait phones: the stage is short — slim the title stack down */
+  /* portrait phones: tall stage — give the hero room, drop the corner goons */
   @media (max-width: 640px) and (orientation: portrait) {
-    #titleScreen .sub { display: none; }
-    .hero-dili { width: 92px; }
+    .hero-dili { width: 118px; }
     .peek { display: none; }
   }
   /* short screens (landscape phones): compress the title so nothing clips */
   @media (max-height: 560px) {
-    .hero-dili { width: 60px; }
+    .hero-dili { width: 72px; }
     #titleScreen { gap: 4px; }
     #titleScreen h1 { font-size: clamp(26px, 5vw, 40px); }
-    .tagline { display: none; }
-    .sub { font-size: 12px; line-height: 1.35; }
     .logo-lockup .word { font-size: 14px; }
     .bigbtn { min-height: 46px; padding: 9px 24px; }
     .storyphoto, .storyphoto img { width: 92px; height: 97px; }
@@ -360,6 +342,8 @@
       <div class="coinchip c2"><span class="coin">Ð</span> HODL the streak!</div>
       <svg class="peek left" viewBox="0 0 60 70" aria-hidden="true"><rect x="14" y="34" width="32" height="30" rx="4" fill="#6e3b8a"/><rect x="17" y="12" width="26" height="22" rx="5" fill="#d9a066"/><rect x="15" y="6" width="30" height="9" rx="3" fill="#3a2b55"/><rect x="20" y="20" width="20" height="5" fill="#14141f"/><rect x="40" y="40" width="18" height="6" rx="2" fill="#2b2f3a"/><circle cx="24" cy="29" r="2.4" fill="#ff5c5c"/><circle cx="36" cy="29" r="2.4" fill="#ff5c5c"/></svg>
       <svg class="peek right" viewBox="0 0 60 70" aria-hidden="true"><rect x="14" y="32" width="32" height="32" rx="4" fill="#7a4a2b"/><rect x="17" y="12" width="26" height="22" rx="5" fill="#d9a066"/><rect x="15" y="6" width="30" height="9" rx="3" fill="#3a2b55"/><rect x="20" y="20" width="20" height="5" fill="#14141f"/><rect x="24" y="38" width="12" height="20" rx="2" fill="#9fb6d9"/><circle cx="24" cy="29" r="2.4" fill="#ff5c5c"/><circle cx="36" cy="29" r="2.4" fill="#ff5c5c"/></svg>
+      </div>
+      <div class="title-mid">
       <svg class="hero-dili" viewBox="0 0 320 360" role="img" aria-label="Dili — DLICOM mascot: blue speech-bubble face, bubble helmet, cape and white D on chest">
         <defs><linearGradient id="diliSuit" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4db2ff"/><stop offset="1" stop-color="#1e6fe8"/></linearGradient></defs>
         <path d="M108 138 C54 190 44 288 76 344 L152 344 C122 282 118 198 130 152 Z" fill="#1d4ed8"/>
@@ -383,28 +367,12 @@
         <circle cx="160" cy="80" r="66" fill="rgba(170,215,255,.10)" stroke="rgba(255,255,255,.65)" stroke-width="3"/>
         <ellipse cx="128" cy="48" rx="21" ry="10" transform="rotate(-24 128 48)" fill="#ffffff" opacity=".35"/>
       </svg>
-      <p class="tagline">★ DLICOM's Coolest Commando — DILI ★</p>
       <h1>DILI<br><span class="brawl">STREAK BRAWL</span></h1>
-      <p class="sub">The robo-goons stole the Dlicom team's <b style="color:#ffd23e">$DLI</b> moon vault!
-      Run, shoot and rescue the team across 3 stages, grab the coins, and smash three very rude bosses.
-      Chain kills to raise your <b style="color:#ffd23e">streak</b> — get hit and it resets. HODL it!</p>
       </div>
       <div class="title-bottom">
       <button class="bigbtn" id="startBtn">▶ &nbsp;Start Mission</button>
-      <p class="presshint">Press Start — or any key</p>
-      <p id="keyStatus">⌨️ On PC: press any key — the mission will start</p>
-      <div class="keys">
-        <span><b>◀ ▶</b> / <b>A D</b> Move</span>
-        <span><b>▼</b> / <b>S</b> Crouch</span>
-        <span><b>▲</b> / <b>W</b> Aim up</span>
-        <span><b>Space</b> / <b>Z</b> Fire (hold!)</span>
-        <span><b>X</b> / <b>K</b> Jump</span>
-        <span><b>C</b> Grenade</span>
-        <span><b>P</b> Pause</span>
-        <span><b>M</b> Sound</span>
-        <span><b>F</b> Full screen</span>
-        <span>Gamepad 🎮 works too</span>
-      </div>
+      <p class="hintline"><span><b>◀ ▶</b> Move</span><span class="dot">•</span><span><b>Z</b> Shoot</span><span class="dot">•</span><span><b>X</b> Jump</span></p>
+      <button class="ghostbtn" id="titleHelpBtn">? &nbsp;How to Play</button>
       </div>
     </div>
 
@@ -639,7 +607,10 @@ document.addEventListener("keydown", function (e) {
   if (e.code === "KeyF" || e.code === "KeyM" || e.code === "KeyP" || e.code === "Escape" ||
       e.keyCode === 70 || e.keyCode === 77 || e.keyCode === 80 || e.keyCode === 27) return;
   /* Title / end screens: ANY key starts — no hunting for the right key. */
-  if (state === "title") { document.getElementById("startBtn").click(); if (k) pressKey(k); return; }
+  if (state === "title") {
+    if (!document.getElementById("helpScreen").classList.contains("hidden")) return; /* reading How to Play — keys don't start */
+    document.getElementById("startBtn").click(); if (k) pressKey(k); return;
+  }
   if (state === "story") {
     if (e.code === "Enter" || e.keyCode === 13 || k === "jump" || k === "fire") document.getElementById("storyBtn").click();
     return;
@@ -743,7 +714,7 @@ function pollPad() {
 var state = "title"; // title | play | stageclear | over | win
 var paused = false;
 var cam = 0, shake = 0, hitStop = 0, slowMo = 0, flashT = 0, hurtFlash = 0;
-var score = 0, hiScore = 0, totalKills = 0, totalRescues = 0, dliCoins = 0;
+var score = 0, hiScore = 0, totalKills = 0, totalRescues = 0, dliCoins = 0, btcCoins = 0, ethCoins = 0;
 var pigeon = { active: false, x: 0, y: 90, vx: 0, t: 0, next: 1500, dropped: false };
 var stageIdx = 0, stageTime = 0, clearTimer = 0;
 var bullets = [], ebullets = [], grenades = [], enemies = [], parts = [], popups = [], pickups = [], shellsFx = [], cages = [];
@@ -762,6 +733,12 @@ var LINERS = [ /* Dili's crypto one-liners on streak milestones */
   "To the moon! 🌕", "gm, jungle! ☀️", "Buy the dip? I AM the dip!",
   "Paper hands can't touch this! 📄✋", "Streak go brrr! 🔥"
 ];
+/* BTC / ETH coin pickups: funny popups when Dili grabs one */
+var BTC_POPUPS = ["Bitcoin found! 🧡", "BTC to the moon! 🚀", "BTC in the bag!"];
+var ETH_POPUPS = ["Got ETH! 💎", "ETH secured! 🔷", "ETH in the bag!"];
+/* short crypto one-liners: rescued teammates cheer, goons trash-talk */
+var RESCUE_LINES = ["HODL!", "Diamond hands! 💎", "Buy the dip!", "WAGMI!", "gm! ☀️", "Free at last — HODL!"];
+var GOON_LINES = ["HODL!", "Buy the dip!", "WAGMI!", "gm!", "Diamond hands!", "NGMI, Dili!", "My coins now!"];
 var STAGE_INTROS = [
   "Stage 1 — Jungle Outpost", "Stage 2 — Desert Factory", "Stage 3 — Neon Harbor"
 ];
@@ -861,6 +838,8 @@ function spawnEnemy(type, x) {
   if (type === "turret")    { base.hp = 8; base.w = 40; base.h = 44; base.y = GROUND - 44; base.speed = 0; }
   base.maxHp = base.hp;
   enemies.push(base);
+  /* now and then a fresh goon marches in shouting crypto nonsense */
+  if (type !== "turret" && Math.random() < 0.3) popup(x + 15, base.y - 16, GOON_LINES[irnd(0, GOON_LINES.length - 1)], "#ff9d2e");
 }
 function spawnCage(x) { cages.push({ x: x, y: GROUND - 58, w: 40, h: 58, hp: 3, flash: 0, freed: false }); }
 function spawnBoss(stage) {
@@ -879,10 +858,12 @@ function dropPickup(x, y, kind) {
   x = clamp(x, 16, STAGES[stageIdx].len - 46); /* pickups always land inside the playable area */
   pickups.push({ x: x, y: y, w: 26, h: 26, kind: kind, t: 0, vy: -3, vx: rnd(-1, 1) });
 }
+/* coin drops are a crypto mix: mostly $DLI, with ETH and rarer BTC mixed in */
+function coinKind() { var r = Math.random(); return r < 0.62 ? "coin" : r < 0.84 ? "eth" : "btc"; }
 
 /* ---------------- RESET / FLOW ---------------- */
 function resetRun() {
-  score = 0; totalKills = 0; totalRescues = 0; dliCoins = 0; stageIdx = 0;
+  score = 0; totalKills = 0; totalRescues = 0; dliCoins = 0; btcCoins = 0; ethCoins = 0; stageIdx = 0;
   P = newPlayer(); loadStage(0);
 }
 /* Dili's real hitbox — crouching shrinks it low, so straight enemy shots sail overhead. */
@@ -946,7 +927,7 @@ function endGame(win) {
   var bsMult = P.bestStreak > 0 ? 1 + Math.floor(P.bestStreak / 5) : 0;
   s.innerHTML = "Score <b>" + score + "</b> &nbsp;·&nbsp; Best <b>" + hiScore + "</b><br>" +
     "Kills <b>" + totalKills + "</b> &nbsp;·&nbsp; POWs Rescued <b>" + totalRescues + "</b> &nbsp;·&nbsp; $DLI Coins <b>" + dliCoins + "</b><br>" +
-    "Best Streak <b>×" + bsMult + "</b> (" + P.bestStreak + " kills)";
+    "BTC <b>" + btcCoins + "</b> &nbsp;·&nbsp; ETH <b>" + ethCoins + "</b> &nbsp;·&nbsp; Best Streak <b>×" + bsMult + "</b> (" + P.bestStreak + " kills)";
   var strip = document.getElementById("teamStrip");
   if (win && !strip.dataset.built) {
     strip.dataset.built = "1";
@@ -985,7 +966,7 @@ function killEnemy(e, idx) {
   if (P.streak > 0 && P.streak % 10 === 0) { popup(P.x + 15, P.y - 26, LINERS[irnd(0, LINERS.length - 1)], "#ff9d2e"); SFX.streak(); }
   explosion(e.x + e.w / 2, e.y + e.h / 2, e.type === "turret");
   var dropRoll = Math.random();
-  if (dropRoll < 0.16) dropPickup(e.x + 4, e.y + 10, "coin");
+  if (dropRoll < 0.16) dropPickup(e.x + 4, e.y + 10, coinKind());
   else if (e.type !== "turret" && dropRoll < 0.26) dropPickup(e.x + 4, e.y + 10, Math.random() < 0.5 ? "medkit" : "grenade");
   enemies.splice(idx, 1);
 }
@@ -1145,6 +1126,7 @@ function update() {
     cg.freed = true; totalRescues++; score += 250;
     SFX.rescue();
     popup(cg.x + 20, cg.y - 18, "POW Rescued! +250", "#3ee6c4");
+    popup(cg.x + 20, cg.y - 44, "“" + RESCUE_LINES[irnd(0, RESCUE_LINES.length - 1)] + "”", "#ffe9b0");
     burst(cg.x + 20, cg.y + 20, 16, ["#3ee6c4", "#ffd23e", "#fff"], 3.6, 30, 0.12);
     var drops = ["mg", "spread", "rocket", "medkit", "grenade"];
     dropPickup(cg.x + 7, cg.y + 6, drops[irnd(0, drops.length - 1)]);
@@ -1225,7 +1207,7 @@ function update() {
   } else {
     pigeon.t++; pigeon.x += pigeon.vx;
     if (!pigeon.dropped && pigeon.x > cam + 120 && pigeon.x < cam + W - 120 && Math.random() < 0.01) {
-      pigeon.dropped = true; dropPickup(pigeon.x, pigeon.y + 14, "coin");
+      pigeon.dropped = true; dropPickup(pigeon.x, pigeon.y + 14, coinKind());
     }
     if (pigeon.x < cam - 80 || pigeon.x > cam + W + 80) { pigeon.active = false; pigeon.next = irnd(1500, 2600); }
   }
@@ -1240,6 +1222,18 @@ function update() {
         dliCoins++; score += 150; SFX.coin();
         popup(P.x + 15, P.y - 18, "+150 $DLI 🪙", "#ffd23e");
         burst(pk.x + 13, pk.y + 13, 8, ["#ffd23e", "#fff3c4"], 2.4, 18, 0.05);
+        pickups.splice(pi, 1); continue;
+      }
+      if (pk.kind === "btc") {
+        btcCoins++; score += 500; SFX.coin();
+        popup(P.x + 15, P.y - 18, BTC_POPUPS[irnd(0, BTC_POPUPS.length - 1)] + " +500", "#f7931a");
+        burst(pk.x + 13, pk.y + 13, 10, ["#f7931a", "#ffd9a0"], 2.6, 20, 0.05);
+        pickups.splice(pi, 1); continue;
+      }
+      if (pk.kind === "eth") {
+        ethCoins++; score += 300; SFX.coin();
+        popup(P.x + 15, P.y - 18, ETH_POPUPS[irnd(0, ETH_POPUPS.length - 1)] + " +300", "#8fb8ff");
+        burst(pk.x + 13, pk.y + 13, 10, ["#627eea", "#c9d6ff"], 2.6, 20, 0.05);
         pickups.splice(pi, 1); continue;
       }
       if (pk.kind === "medkit") { P.hp = Math.min(P.maxHp, P.hp + 2); popup(P.x + 15, P.y - 18, "+Health ❤", "#7dff8a"); }
@@ -1455,7 +1449,7 @@ function drawBackground(st) {
   }
   /* DLICOM billboards along the stage — logo boards alternate with crypto slogans.
      Phase-shifted so the spawn point (x≈90) is never behind a board. */
-  var BB_TEXTS = ["DLICOM", "HODL!", "WAGMI", "$DLI 🚀", "GM! ☀️", "NO FUD ZONE"];
+  var BB_TEXTS = ["DLICOM", "HODL!", "WAGMI", "$DLI 🚀", "GM! ☀️", "NO FUD ZONE", "BTC 🚀", "ETH 💎", "BUY THE DIP", "MOON SOON 🌕", "HODL 💎"];
   var boff = -(cam % 700) + 330;
   for (var bsx = boff - 700; bsx < W + 700; bsx += 700) {
     var wi = Math.round((bsx + cam - 330) / 700);
@@ -1781,6 +1775,34 @@ function drawPickup(pk) {
     ctx.restore();
     return;
   }
+  if (pk.kind === "btc") { /* a chunky orange Bitcoin */
+    var bx2 = x + 13, by2 = y + 13, bp = 1 + Math.sin(pk.t * 0.15) * 0.08;
+    ctx.save(); ctx.translate(bx2, by2); ctx.scale(bp, bp);
+    ctx.fillStyle = "rgba(247,147,26,.3)"; ctx.beginPath(); ctx.arc(0, 0, 17, 0, 7); ctx.fill();
+    var bg2 = ctx.createRadialGradient(-4, -5, 2, 0, 0, 14);
+    bg2.addColorStop(0, "#ffd9a0"); bg2.addColorStop(0.55, "#f7931a"); bg2.addColorStop(1, "#c26d06");
+    ctx.fillStyle = bg2; ctx.beginPath(); ctx.arc(0, 0, 13, 0, 7); ctx.fill();
+    ctx.strokeStyle = "#9a5603"; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(0, 0, 10.5, 0, 7); ctx.stroke();
+    ctx.fillStyle = "#ffffff"; ctx.font = "900 14px 'Bungee','Trebuchet MS',sans-serif"; ctx.textAlign = "center";
+    ctx.fillText("B", 0, 5.5);
+    ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.moveTo(-2.2, -7); ctx.lineTo(-2.2, 7); ctx.moveTo(1.6, -7); ctx.lineTo(1.6, 7); ctx.stroke();
+    ctx.restore();
+    return;
+  }
+  if (pk.kind === "eth") { /* a floating ETH diamond — drawn, no glyph needed */
+    var ex = x + 13, ey = y + 13, ep = 1 + Math.sin(pk.t * 0.15) * 0.08;
+    ctx.save(); ctx.translate(ex, ey); ctx.scale(ep, ep);
+    ctx.fillStyle = "rgba(98,126,234,.3)"; ctx.beginPath(); ctx.arc(0, 0, 17, 0, 7); ctx.fill();
+    ctx.fillStyle = "#8a9ff5";
+    ctx.beginPath(); ctx.moveTo(0, -12); ctx.lineTo(8, 2); ctx.lineTo(0, 6); ctx.lineTo(-8, 2); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = "rgba(255,255,255,.5)";
+    ctx.beginPath(); ctx.moveTo(0, -12); ctx.lineTo(8, 2); ctx.lineTo(0, 6); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = "#627eea";
+    ctx.beginPath(); ctx.moveTo(0, 8.5); ctx.lineTo(8, 4); ctx.lineTo(0, 13); ctx.lineTo(-8, 4); ctx.closePath(); ctx.fill();
+    ctx.restore();
+    return;
+  }
   var colors = { mg: "#ffb35c", spread: "#3ee6c4", rocket: "#7dff8a", medkit: "#ff8a7a", grenade: "#ffd23e" };
   R(x - 2, y - 2, 30, 30, "rgba(0,0,0,.35)");
   R(x, y, 26, 26, colors[pk.kind]);
@@ -2030,14 +2052,17 @@ function openHelp(from) {
   helpReturn = from;
   document.getElementById("pauseScreen").classList.add("hidden");
   document.getElementById("endScreen").classList.add("hidden");
+  document.getElementById("titleScreen").classList.add("hidden");
   document.getElementById("helpScreen").classList.remove("hidden");
 }
 document.getElementById("helpBtn").addEventListener("click", function () { openHelp("pause"); this.blur(); });
 document.getElementById("endHelpBtn").addEventListener("click", function () { openHelp("end"); this.blur(); });
+document.getElementById("titleHelpBtn").addEventListener("click", function () { openHelp("title"); this.blur(); });
 document.getElementById("helpBackBtn").addEventListener("click", function () {
   document.getElementById("helpScreen").classList.add("hidden");
   if (helpReturn === "pause" && state === "play") document.getElementById("pauseScreen").classList.remove("hidden");
   else if (helpReturn === "end") document.getElementById("endScreen").classList.remove("hidden");
+  else if (helpReturn === "title") document.getElementById("titleScreen").classList.remove("hidden");
   this.blur(); focusGame();
 });
 function syncTopbar() {
@@ -2106,7 +2131,7 @@ document.addEventListener("keydown", function (e) {
   if (e.code === "Escape") { if (pseudoFs) setPseudoFs(false); else togglePause(); }
   if (e.code === "KeyM") toggleMute();
   if (e.code === "KeyF") toggleFullscreen();
-  if (state === "title" && e.code === "Enter") document.getElementById("startBtn").click();
+  if (state === "title" && e.code === "Enter" && document.getElementById("helpScreen").classList.contains("hidden")) document.getElementById("startBtn").click();
   /* Enter on the end screen is handled (with its safety delay) by the main key handler */
 }, true);
 cv.addEventListener("touchstart", function () { audio(); }, { passive: true });
