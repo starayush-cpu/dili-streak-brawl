@@ -317,6 +317,23 @@
     .hero-dili { width: 118px; }
     .peek { display: none; }
   }
+  /* ---------- portrait phones: play view on top, controls in their own deck ----------
+     The stage frame is taller than the canvas view (600x800 view + a 220-unit
+     deck in a 600x1020 frame). The touch controls live in the solid deck strip
+     BELOW the canvas, so the joystick and buttons never cover Dili, the
+     ground line or the fight. */
+  body.portrait #stage { background: #0a0e22; }
+  body.portrait canvas { height: 78.43%; border-radius: 10px 10px 0 0; }
+  body.portrait #touch {
+    top: 78.43%; bottom: 0; height: auto; align-items: center;
+    background: linear-gradient(180deg, #141b42, #0a0e22);
+    border-top: 2px solid #2c3768; border-radius: 0 0 10px 10px;
+    padding: 6px 12px calc(6px + env(safe-area-inset-bottom));
+  }
+  body.portrait #stick { width: 100px; height: 100px; }
+  body.portrait #knob { width: 46px; height: 46px; }
+  body.portrait .tbtn { width: 56px; height: 56px; }
+  body.portrait .tbtn.fire { width: 76px; height: 76px; }
   /* short screens (landscape phones): compress the title so nothing clips */
   @media (max-height: 560px) {
     .hero-dili { width: 72px; }
@@ -538,20 +555,23 @@ window.addEventListener("error", function () {
 var W = 960, H = 540, GROUND = 470;
 var cv = document.getElementById("game");
 var ctx = cv.getContext("2d");
-/* Portrait phones get a tall 600x960 view of the same world, so the stage
-   fills the phone instead of shrinking to a letterboxed strip. */
+/* Portrait phones get a tall 600x800 view of the same world inside a
+   600x1020 stage frame: the extra 220 units at the bottom are a dedicated
+   control deck (see the body.portrait CSS), so the touch buttons sit below
+   the play view instead of on top of the ground and the fighters. */
 var viewPortrait = false;
 function fitView() {
   var portrait = window.innerWidth < window.innerHeight && window.innerWidth < 760;
   if (portrait === viewPortrait && cv.width === W) return;
   viewPortrait = portrait;
-  if (portrait) { W = 600; H = 960; } else { W = 960; H = 540; }
+  document.body.classList.toggle("portrait", portrait);
+  if (portrait) { W = 600; H = 800; } else { W = 960; H = 540; }
   GROUND = H - 70;
   cv.width = W; cv.height = H;
   var stEl = document.getElementById("stage");
   if (portrait) {
-    stEl.style.aspectRatio = "600 / 960";
-    stEl.style.width = "min(100%, calc((100dvh - 52px) * 600 / 960))";
+    stEl.style.aspectRatio = "600 / 1020";
+    stEl.style.width = "min(100%, calc((100dvh - 52px) * 600 / 1020))";
     stEl.style.maxHeight = "calc(100dvh - 52px)";
   } else {
     stEl.style.aspectRatio = ""; stEl.style.width = ""; stEl.style.maxHeight = "";
@@ -2043,7 +2063,7 @@ function drawBackground(st) {
   g.addColorStop(0, st.sky[0]); g.addColorStop(0.55, st.sky[1]); g.addColorStop(1, st.sky[2]);
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
   /* sun / moon — with a glow halo and surface shading, never a flat disc */
-  var sunX = W - 170 - (cam * 0.02 % 60), sunY = st.name === "harbor" ? 74 : 96, sunR = st.name === "harbor" ? 27 : 38;
+  var sunX = W - 170 - (cam * 0.02 % 60), sunY = viewPortrait ? 208 : (st.name === "harbor" ? 74 : 96), sunR = st.name === "harbor" ? 27 : 38;
   var glow = ctx.createRadialGradient(sunX, sunY, sunR * 0.4, sunX, sunY, sunR * 3.1);
   glow.addColorStop(0, st.name === "harbor" ? "rgba(190,220,255,.34)" : "rgba(255,220,130,.4)");
   glow.addColorStop(1, "rgba(255,220,130,0)");
@@ -2056,6 +2076,10 @@ function drawBackground(st) {
   ctx.beginPath(); ctx.arc(sunX - sunR * 0.3, sunY + sunR * 0.15, sunR * 0.2, 0, 7); ctx.fill();
   ctx.beginPath(); ctx.arc(sunX + sunR * 0.32, sunY - sunR * 0.28, sunR * 0.14, 0, 7); ctx.fill();
   ctx.beginPath(); ctx.arc(sunX + sunR * 0.1, sunY + sunR * 0.45, sunR * 0.11, 0, 7); ctx.fill();
+  /* Portrait: stretch the silhouette layers up from the ground line, so the
+     tall view is filled with hills, ruins and canopy instead of empty sky.
+     (Only shapes are stretched — billboards and the ground stay true.) */
+  if (viewPortrait) { ctx.save(); ctx.translate(0, GROUND); ctx.scale(1, 1.4); ctx.translate(0, -GROUND); }
   /* far hills */
   ctx.fillStyle = st.hill;
   ctx.beginPath(); ctx.moveTo(0, GROUND);
@@ -2097,6 +2121,7 @@ function drawBackground(st) {
     else if (st.name === "sky") { R(bx + 26, GROUND - 96, 66, 14, st.hill2); R(bx + 44, GROUND - 82, 30, 8, st.hill2); R(bx + 150, GROUND - 130, 54, 12, st.hill2); R(bx + 164, GROUND - 118, 26, 8, st.hill2); }
     else { R(bx + 20, GROUND - 130, 54, 130, st.hill2); R(bx + 34, GROUND - 152, 26, 24, st.hill2); R(bx + 130, GROUND - 84, 70, 84, st.hill2); R(bx + 196, GROUND - 108, 8, 108, st.hill2); }
   }
+  if (viewPortrait) ctx.restore();
   /* DLICOM billboards along the stage — logo boards alternate with crypto slogans.
      Phase-shifted so the spawn point (x≈90) is never behind a board. */
   var BB_TEXTS = ["DLICOM", "HODL!", "WAGMI", "$DLI 🚀", "GM! ☀️", "NO FUD ZONE", "BTC 🚀", "ETH 💎", "BUY THE DIP", "MOON SOON 🌕", "HODL 💎"];
@@ -2121,6 +2146,7 @@ function drawBackground(st) {
     }
   }
   /* foreground framing — big dark shapes at the edges give the scene real depth */
+  if (viewPortrait) { ctx.save(); ctx.translate(0, GROUND); ctx.scale(1, 1.4); ctx.translate(0, -GROUND); }
   ctx.fillStyle = "rgba(6,8,20,.34)";
   var foff = -(cam * 0.8 % 520);
   for (var fx2 = foff - 520; fx2 < W + 520; fx2 += 520) {
@@ -2140,6 +2166,7 @@ function drawBackground(st) {
       R(fx2 + 18, GROUND - 196, 60, 6, "rgba(6,8,20,.3)");
     }
   }
+  if (viewPortrait) ctx.restore();
   /* ground */
   R(0, GROUND, W, H - GROUND, st.ground);
   R(0, GROUND, W, 8, st.groundTop);
