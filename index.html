@@ -229,6 +229,38 @@
   #titleScreen { gap: 7px; }
   @keyframes diliBob { 0%,100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-7px) rotate(1deg); } }
   @media (prefers-reduced-motion: reduce) { .hero-dili { animation: none; } }
+  /* ---------- MOVIE MODE: letterbox, chapters, dialogue, cutscenes ---------- */
+  .bar { position:absolute; left:0; right:0; height:0; background:#000; z-index:7; transition:height .7s ease; pointer-events:none; }
+  .bar.top { top:0; } .bar.bot { bottom:0; }
+  body.movie .bar { height:9%; }
+  .fadeveil { position:absolute; inset:0; background:#000; z-index:8; opacity:0; pointer-events:none; transition:opacity .45s ease; border-radius:10px; }
+  body.fading .fadeveil { opacity:1; }
+  #chapterScreen { background:#000; z-index:9; gap:6px; }
+  #chapterScreen .ch-kicker { margin:0; font-size:12px; font-weight:900; letter-spacing:4px; color:#3ee6c4; text-transform:uppercase; }
+  #chapterScreen h2 { margin:0; font-family:"Bungee",sans-serif; font-weight:400; font-size:clamp(26px,5.4vw,52px); color:#ffd23e; text-shadow:0 3px 0 #7a1f3d; line-height:1.1; }
+  #chapterScreen .ch-sub { margin:0; font-size:clamp(13px,2.2vw,16px); color:#c9d4ff; font-style:italic; max-width:560px; }
+  #chapterScreen .ch-tap { margin:10px 0 0; font-size:12px; font-weight:800; letter-spacing:1px; color:#5f6ca6; }
+  #dialogueScreen { background:transparent; z-index:9; justify-content:flex-end; padding:0 0 11%; align-items:stretch; }
+  .dlgbox { margin:0 auto; width:min(92%,720px); background:linear-gradient(180deg,#18224e,#0d1330); border:2px solid #ffd23e; border-radius:14px; display:flex; gap:14px; padding:14px 16px; text-align:left; box-shadow:0 18px 44px rgba(0,0,0,.65); cursor:pointer; }
+  .dlgface { flex:0 0 auto; width:74px; height:78px; border-radius:10px; border:2.5px solid #ffd23e; object-fit:cover; object-position:top center; background:#2a3565; }
+  .dlgdili { flex:0 0 auto; width:74px; height:78px; border-radius:10px; border:2.5px solid #3ee6c4; background:linear-gradient(180deg,#4db2ff,#1e6fe8); display:none; align-items:center; justify-content:center; font-family:"Bungee",sans-serif; font-size:30px; color:#fff; }
+  .dlgboss { flex:0 0 auto; width:74px; height:78px; border-radius:10px; border:2.5px solid #ff5c5c; background:linear-gradient(180deg,#5a6172,#23232e); display:none; align-items:center; justify-content:center; font-size:34px; }
+  .dlgbody { min-width:0; flex:1; }
+  .dlgname { margin:0 0 3px; font-family:"Bungee",sans-serif; font-size:14px; color:#ffd23e; letter-spacing:.5px; }
+  .dlgtext { margin:0; font-size:clamp(14px,2.3vw,17px); line-height:1.5; color:#f2f4ff; min-height:44px; }
+  .dlghint { margin:6px 0 0; font-size:11px; font-weight:800; letter-spacing:1px; color:#8fa0d8; }
+  #cutScreen { background:#05060f; z-index:9; justify-content:flex-start; padding:11% 18px 12%; gap:10px; }
+  .cutstage { position:relative; width:min(94%,640px); height:46%; min-height:170px; border-radius:14px; overflow:hidden; border:2px solid #3a4a8f; background:linear-gradient(180deg,#2b1055,#101736); }
+  .cutphoto { position:absolute; right:6%; top:8%; width:34%; height:84%; object-fit:cover; object-position:top center; border-radius:12px; border:3px solid #ffd23e; animation:kenburns 12s ease-in-out infinite alternate; box-shadow:0 14px 30px rgba(0,0,0,.55); }
+  @keyframes kenburns { from { transform:scale(1) translate(0,0); } to { transform:scale(1.16) translate(-3%,2%); } }
+  .cutdili { position:absolute; left:7%; bottom:8%; width:clamp(90px,20vw,150px); animation:cutwalk 3.2s ease-in-out infinite; }
+  @keyframes cutwalk { 0%,100% { transform:translate(0,0) rotate(-1.5deg); } 50% { transform:translate(26px,-9px) rotate(1.5deg); } }
+  .cutspark { position:absolute; font-size:18px; animation:sparkfloat 2.4s ease-in-out infinite; pointer-events:none; }
+  @keyframes sparkfloat { 0%,100% { transform:translateY(0); opacity:.5; } 50% { transform:translateY(-14px); opacity:1; } }
+  #cutText { margin:0; max-width:640px; font-size:clamp(14.5px,2.5vw,18px); line-height:1.6; color:#f2f4ff; min-height:52px; }
+  #cutName { margin:0; font-family:"Bungee",sans-serif; font-size:15px; color:#ffd23e; }
+  .skipbtn { position:absolute; top:calc(9% + 10px); right:14px; z-index:10; }
+  @media (prefers-reduced-motion: reduce) { .cutphoto, .cutdili, .cutspark { animation:none; } }
   button:focus-visible, .tbtn:focus-visible { outline: 3px solid #ffd23e; outline-offset: 2px; }
   .iconbtn:hover, .ghostbtn:hover { border-color: #ffd23e; color: #ffd23e; }
   .bigbtn:hover { filter: brightness(1.07); }
@@ -377,7 +409,9 @@
       <h1>DILI<br><span class="brawl">STREAK BRAWL</span></h1>
       </div>
       <div class="title-bottom">
+      <p style="margin:0; font-size:11px; font-weight:900; letter-spacing:3px; color:#8fb8ff;">A DLICOM COMMUNITY FILM 🎬</p>
       <button class="bigbtn" id="startBtn">▶ &nbsp;Start Mission</button>
+      <button class="ghostbtn" id="endlessBtn">♾️ &nbsp;Endless Mode — Beat Your Best!</button>
       <p class="hintline"><span><b>◀ ▶</b> Move</span><span class="dot">•</span><span><b>Z</b> Shoot</span><span class="dot">•</span><span><b>X</b> Jump</span></p>
       <p class="bestline" id="titleBest"></p>
       <button class="ghostbtn" id="titleHelpBtn">? &nbsp;How to Play</button>
@@ -423,10 +457,11 @@
     <div class="screen hidden" id="helpScreen">
       <h2 class="menutitle">How to Play</h2>
       <div class="helppanel">
-        <p><b>Goal:</b> the Robo-Goons stole the community's crypto vault! Fight through 3 stages, take back the <b style="color:#ffd23e">BTC, ETH and $DLI</b>, rescue the caged Dlicom team and smash each stage's boss. A rescued teammate <b>fights beside you</b> for the rest of the run. You have <b>3 lives</b> — cross the mid-stage <b>🚩 checkpoint</b> and a fall sends you back there, not to the start. Grab ❤ hearts for extra lives. Chain kills without getting hit to raise your <b style="color:#ffd23e">streak multiplier</b>.</p>
+        <p><b>Goal:</b> the Robo-Goons stole the community's crypto vault! Fight through <b>5 big stages</b> like a movie — jungle, desert, harbor, a frozen crypto mine and the Sky Vault — take back the <b style="color:#ffd23e">BTC, ETH and $DLI</b>, rescue the caged Dlicom team and smash each stage's boss. Watch the <b>talking scenes</b>: tap to advance the dialogue. A rescued teammate <b>fights beside you</b> for the rest of the run. You have <b>3 lives</b> — cross the mid-stage <b>🚩 checkpoint</b> and a fall sends you back there. Grab ❤ hearts for extra lives.</p>
+        <p><b>Combos &amp; loot:</b> chain kills to raise your combo to <b style="color:#ffd23e">×2, ×3, ×5</b>. Dodge a bullet by a hair for a <b>"So close! +50"</b> bonus. Smash 📦 crates and goons for power-ups: <b>Spread Shot, 🛡️ Shield, ×2 Coins and 🧲 Coin Magnet</b>. Watch for surprise events — coin rain, pigeon airstrikes and the legendary <b>Golden Goon</b> worth a fortune!</p>
         <p><b>PC:</b> ◀ ▶ / A D move · ▼ / S crouch (dodges straight shots — keep firing!) · ▲ / W aim up · Space / Z fire · X / K jump · C / L grenade · P pause · M sound · F fullscreen. Gamepad works too. Drones overhead? Just fire — Dili auto-aims up at them.</p>
         <p><b>Phone:</b> drag the joystick (◀ ▶ move, push ▲ to jump, push ▼ to crouch) and use the FIRE, JUMP, BOMB and CROUCH buttons.</p>
-        <p><b>Boss tips:</b> jump the Juggernaut's ground shockwaves, dodge the Mauler's stinger tail, and never stand still for the Crab-Tank's cannon.</p>
+        <p><b>Boss tips:</b> jump the Juggernaut's shockwaves, dodge the Mauler's stinger, melt Frostbite before he freezes your coins, and keep moving under Captain Moonbags — he drops bombers. Clear the story to unlock the bragging rights, then chase your Best in <b>♾️ Endless Mode</b>.</p>
       </div>
       <button class="bigbtn" id="helpBackBtn">◀ &nbsp;Back</button>
     </div>
@@ -441,6 +476,41 @@
       <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
         <button class="ghostbtn" id="endHelpBtn">? &nbsp;How to Play</button>
         <button class="ghostbtn" id="endQuitBtn">🏠 &nbsp;Quit to Title</button>
+      </div>
+    </div>
+
+    <div class="bar top"></div><div class="bar bot"></div><div class="fadeveil" id="fadeVeil"></div>
+
+    <div class="screen hidden" id="chapterScreen">
+      <p class="ch-kicker" id="chapterKicker">Chapter 1</p>
+      <h2 id="chapterTitle">Jungle Outpost</h2>
+      <p class="ch-sub" id="chapterSub"></p>
+      <p class="ch-tap">TAP TO BEGIN ▸</p>
+    </div>
+
+    <div class="screen hidden" id="cutScreen">
+      <button class="ghostbtn skipbtn" id="cutSkipBtn">Skip ▸▸</button>
+      <div class="cutstage" id="cutStage">
+        <img class="cutphoto" id="cutImg" alt="Rescued Dlicom teammate" />
+        <svg class="cutdili" viewBox="0 0 320 360" aria-hidden="true"><path d="M108 138 C54 190 44 288 76 344 L152 344 C122 282 118 198 130 152 Z" fill="#1d4ed8"/><rect x="140" y="282" width="24" height="42" rx="9" fill="#2f7bff"/><rect x="172" y="282" width="24" height="42" rx="9" fill="#2f7bff"/><rect x="132" y="318" width="38" height="17" rx="8" fill="#ffffff"/><rect x="166" y="318" width="38" height="17" rx="8" fill="#ffffff"/><path d="M118 148 Q160 130 202 148 L210 252 Q160 272 110 252 Z" fill="#2f7bff"/><text x="160" y="224" text-anchor="middle" font-size="54" font-weight="800" fill="#ffffff">D</text><rect x="110" y="34" width="100" height="88" rx="27" fill="#2f7bff"/><polygon points="141,62 151,74 141,86 131,74" fill="#eaf7ff"/><polygon points="183,62 193,74 183,86 173,74" fill="#eaf7ff"/><path d="M147 97 Q160 107 173 97" fill="none" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round"/><circle cx="160" cy="80" r="66" fill="rgba(170,215,255,.10)" stroke="rgba(255,255,255,.65)" stroke-width="3"/></svg>
+        <span class="cutspark" style="left:46%; top:16%;">✦</span><span class="cutspark" style="left:56%; top:58%; animation-delay:.7s;">🪙</span><span class="cutspark" style="left:38%; top:70%; animation-delay:1.3s;">✦</span>
+      </div>
+      <p id="cutName">The Story So Far…</p>
+      <p id="cutText"></p>
+      <p style="margin:0; font-size:11px; font-weight:800; letter-spacing:1px; color:#5f6ca6;">TAP ANYWHERE TO CONTINUE ▸</p>
+    </div>
+
+    <div class="screen hidden" id="dialogueScreen">
+      <button class="ghostbtn skipbtn" id="dlgSkipBtn">Skip ▸▸</button>
+      <div class="dlgbox" id="dlgBox" role="button" aria-label="Next dialogue line">
+        <img class="dlgface" id="dlgImg" alt="Speaker portrait" />
+        <div class="dlgdili" id="dlgDili">D</div>
+        <div class="dlgboss" id="dlgBoss">🤖</div>
+        <div class="dlgbody">
+          <p class="dlgname" id="dlgName">Dili</p>
+          <p class="dlgtext" id="dlgText"></p>
+          <p class="dlghint">TAP FOR NEXT LINE ▸</p>
+        </div>
       </div>
     </div>
 
@@ -636,9 +706,12 @@ document.addEventListener("keydown", function (e) {
     return;
   }
   if (state === "intro") {
+    if (!document.getElementById("chapterScreen").classList.contains("hidden")) { dismissChapter(); return; }
     if (e.code === "Enter" || e.keyCode === 13 || k === "jump" || k === "fire") document.getElementById("introBtn").click();
     return;
   }
+  if (state === "dialogue") { advanceDialogue(); return; }
+  if (state === "cutscene") { advanceCutscene(); return; }
   if (state === "over" || state === "win") {
     /* a deliberate press only: the shot that killed you must not skip the results */
     if (performance.now() - endTime > 900 && (k === "jump" || k === "fire" || e.code === "Enter" || e.keyCode === 13)) {
@@ -741,10 +814,17 @@ var cam = 0, shake = 0, hitStop = 0, slowMo = 0, flashT = 0, hurtFlash = 0;
 var score = 0, hiScore = 0, totalKills = 0, totalRescues = 0, dliCoins = 0, btcCoins = 0, ethCoins = 0;
 var pigeon = { active: false, x: 0, y: 90, vx: 0, t: 0, next: 1500, dropped: false };
 var stageIdx = 0, stageTime = 0, clearTimer = 0;
-var bullets = [], ebullets = [], grenades = [], enemies = [], parts = [], popups = [], pickups = [], shellsFx = [], cages = [];
+var bullets = [], ebullets = [], grenades = [], enemies = [], parts = [], popups = [], pickups = [], shellsFx = [], cages = [], crates = [];
 var boss = null, bossMode = false;
 var allies = [], checkpointX = 90, stageAllyDone = false, tauntCdG = 0;
 var bossRetryHp = 0; /* a boss keeps the damage it took when Dili falls and retries from the checkpoint */
+/* ---- BIG GAME systems: endless, power-ups, events, movie scenes ---- */
+var endless = false, endlessT = 0, endlessSpawnT = 0, endlessLevel = 1, endlessBossT = 0;
+var shieldT = 0, doubleT = 0, magnetT = 0; /* active power-up timers (frames) */
+var eventT = 1500, argueT = 900; /* surprise-event + goon-argument clocks — no dead air */
+var pendingBoss = false; /* boss waits for its talking scene to finish */
+var dlgLines = null, dlgIdx = 0, dlgDone = null, dlgTypeT = 0, dlgFull = "";
+var cutTimer = null, chapterTimer = null;
 
 var QUIPS = [
   "The enemy's gone packing!",
@@ -764,42 +844,106 @@ var BTC_POPUPS = ["Bitcoin found!", "BTC to the moon!"];
 var ETH_POPUPS = ["Got ETH!", "ETH secured!"];
 var DLI_POPUPS = ["$DLI secured!", "DLI to the moon!"];
 /* goons and bosses talk back when they land a hit on Dili */
-var TAUNT_LINES = ["Nice aim, paper hands!", "I shorted your streak!", "NGMI!", "Thanks for the dip!", "Paper hands detected!"];
+var TAUNT_LINES = ["Nice aim, paper hands!", "I shorted your streak!", "NGMI, Dili!", "Thanks for the dip!", "Paper hands detected!", "My grandma shoots faster!", "That tickled. Seriously.", "I bought your dip AND your lunch!", "You call that a streak? Cute.", "Error 404: your aim not found!"];
 var BOSS_CHATTER = [
-  ["I AM the jungle! And I paper-handed your BTC!", "Your BTC? I spent it on bananas!", "SMASH first, HODL later!"],
-  ["My portfolio is 100% memecoins!", "Sssell? Never heard of it.", "The sssand shorted your sssneakers!"],
-  ["Diamond claws! DIAMOND CLAWS!", "The vault is my emotional support stash.", "I sold once. ONCE. It haunts me."]
+  ["I AM the jungle! And I paper-handed your BTC!", "Your BTC? I spent it on bananas!", "SMASH first, HODL later!", "My banana portfolio is up 400%!"],
+  ["My portfolio is 100% memecoins!", "Sssell? Never heard of it.", "The sssand shorted your sssneakers!", "I buried my seed phrase. In the sssand. Forever."],
+  ["Diamond claws! DIAMOND CLAWS!", "The vault is my emotional support stash.", "I sold once. ONCE. It haunts me.", "My claw has its own wallet now."],
+  ["Your coins? Frozen assets. Literally.", "I mine at -40 degrees. My rigs love it. My toes don't.", "Brain freeze is a security feature!", "Cold storage? I INVENTED cold storage!"],
+  ["I can see my house from here. And your coins.", "Gravity is just FUD with physics.", "My moon base has NO exit liquidity. For you.", "To the moon was MY idea!"]
 ];
 /* rescued teammates join the fight: stage -> TEAM index, join line, drawn look */
-var ALLY_FOR_STAGE = [1, 2, 0]; /* George in the jungle, Timur in the desert, Mohammad at the harbor */
-var ALLY_JOIN_LINES = ["For the community! Charge!", "I'm with you! Let's make this go viral!", "Deploying backup... me!"];
+var ALLY_FOR_STAGE = [1, 2, 3, 4, 5]; /* George, Timur, Alex, Belal, Kira — one per stage */
+var ALLY_JOIN_LINES = ["Community first, always. Charge!", "Let's make this rescue go viral!", "Deploying backup... me!", "I brought concept art AND a blaster!", "Deals close themselves when I show up. Watch!", "Partnership status: Dili + me. Signed!"]; /* indexed by TEAM index */
 var ALLY_STYLE = [
+  { suit: "#7a4a9e", dark: "#5b3576", hair: "#0d0d0f", skin: "#e8b98a" },
   { suit: "#c9862b", dark: "#9a6414", hair: "#14100c", skin: "#a06a3c" },
   { suit: "#159a8c", dark: "#0f7268", hair: "#241a12", skin: "#c98d64" },
-  { suit: "#7a4a9e", dark: "#5b3576", hair: "#0d0d0f", skin: "#e8b98a" }
+  { suit: "#2f7bff", dark: "#1e56b8", hair: "#3a2a18", skin: "#d9a06a" },
+  { suit: "#e2547e", dark: "#b83a5e", hair: "#5a3a1a", skin: "#f0c8a0" },
+  { suit: "#3aa655", dark: "#2a7d40", hair: "#1a1a22", skin: "#e8b98a" }
 ];
 /* short crypto one-liners: rescued teammates cheer, goons trash-talk */
-var RESCUE_LINES = ["HODL!", "Diamond hands! 💎", "Buy the dip!", "WAGMI!", "gm! ☀️", "Free at last — HODL!"];
-var GOON_LINES = ["HODL!", "Buy the dip!", "WAGMI!", "gm!", "Diamond hands!", "NGMI, Dili!", "My coins now!"];
+var RESCUE_LINES = ["HODL!", "Diamond hands! 💎", "Buy the dip!", "WAGMI!", "gm! ☀️", "Free at last — HODL!", "My cage had NO Wi-Fi. Barbaric!"];
+var GOON_LINES = ["HODL!", "Buy the dip!", "WAGMI!", "gm!", "Diamond hands!", "NGMI, Dili!", "My coins now!", "You HODL, I'll fold!", "Is it payday yet?", "Mom said get a real job!"];
+var GOON_ARGUE = [["You HODL!", "No, YOU hodl!"], ["I saw him first!", "I shot first!"], ["Whose turn to lose?", "Yours. Always yours."], ["Did we lock the vault?", "...Vault?"]];
+var BOOM_WORDS = ["POW! 💥", "BOOM! 💥", "WAGMI! 🚀", "KAPOW!", "TO THE MOON! 🌕", "REKT!"];
 var STAGE_INTROS = [
-  "Stage 1 — Jungle Outpost", "Stage 2 — Desert Foundry", "Stage 3 — Neon Harbor"
+  "Stage 1 — Jungle Outpost", "Stage 2 — Desert Foundry", "Stage 3 — Neon Harbor", "Stage 4 — Frozen Crypto Mine", "Stage 5 — The Sky Vault"
+];
+var CHAPTER_NAMES = ["Jungle Outpost", "Desert Foundry", "Neon Harbor", "Frozen Crypto Mine", "The Sky Vault"];
+var CHAPTER_SUBS = [
+  "Where the BTC went to hide — and the bananas unionised.",
+  "Fake $DLI, real heat, zero sunscreen.",
+  "The Admiral counts his coins. Slowly. With both claws.",
+  "Cold storage, taken far too literally.",
+  "The last vault. It floats. Of course it floats."
 ];
 var STAGE_SUBS = [
   "The goons hid the BTC in the jungle. They even left a note: 'Come and take it, bubble boy.' Rude.",
   "The desert forge is minting fake $DLI. The boss here thinks 'HODL' means 'hold my sandwich'.",
-  "Final vault. Admiral Crab-Tank sits on the whole stash. He has never sold. Not once. Diamond claws."
+  "The harbor stash floats under the Admiral's claw. He has never sold. Not once. Diamond claws.",
+  "Deep in the ice, the goons mine with stolen rigs and mittens. Frostbite, their golem, keeps the ETH in a block of ice 'for security'.",
+  "The last hideout floats above the clouds: the Sky Vault. Captain Moonbags parked the rest of the stash on the moon's doorstep. Time to knock."
 ];
 /* One completely different boss per stage: sprite, size, attacks, taunts. */
 var BOSS_DEFS = [
-  { kind: "gorilla",  name: "Jungle Juggernaut", w: 148, h: 118, hp: 75,
+  { kind: "gorilla",  name: "Jungle Juggernaut", w: 148, h: 118, hp: 58,
     taunt: "“I AM the jungle! And I paper-handed your BTC!”",
     taunt2: "“STOP DODGING! MY ARMS ARE TIRED!”" },
-  { kind: "scorpion", name: "Desert Mauler", w: 208, h: 96, hp: 125,
+  { kind: "scorpion", name: "Desert Mauler", w: 208, h: 96, hp: 92,
     taunt: "“My tail stings, my sand blinds, and my portfolio is 100% memecoins!”",
     taunt2: "“The sssand will bury your portfolio!”" },
-  { kind: "tank",     name: "Admiral Crab-Tank", w: 190, h: 118, hp: 165,
+  { kind: "tank",     name: "Admiral Crab-Tank", w: 190, h: 118, hp: 122,
     taunt: "“I never sell! I never sell! ...Okay, I sold once. It haunts me.”",
-    taunt2: "“Enrage mode! NOBODY sells the Admiral's coins!”" }
+    taunt2: "“Enrage mode! NOBODY sells the Admiral's coins!”" },
+  { kind: "golem",    name: "Frostbite", w: 150, h: 132, hp: 138,
+    taunt: "“COLD STORAGE! Your coins stay frozen... FOREVER!”",
+    taunt2: "“DEFROSTING MY ANGER! IT BURNS! IT BURNS!”" },
+  { kind: "moon",     name: "Captain Moonbags", w: 176, h: 104, hp: 152,
+    taunt: "“To the moon? I LIVE there. Rent is due, bubble boy!”",
+    taunt2: "“GRAVITY GLITCH! EVERYTHING FALLS! EVERYTHING!”" }
+];
+/* Talking scenes: before each boss the boss talks back; after each stage Dili
+   and the rescued teammate trade lines. Speaker: dili | team | boss | name. */
+var BOSS_DIALOGUES = [
+  [ { s: "boss", t: "STOP! This jungle — and this BTC — is MINE! I even named a banana after it!" },
+    { s: "dili", t: "The BTC belongs to the community, big guy. Also... a banana?" },
+    { s: "boss", t: "Sir Hodlsalot. He is my financial advisor. ATTACK!" } ],
+  [ { s: "boss", t: "Sssstop! The forge makesss fake $DLI and NOBODY complains!" },
+    { s: "dili", t: "The community complained. Loudly. With memes." },
+    { s: "boss", t: "Memesss bounce off my ssshell. Mostly. FIGHT!" } ],
+  [ { s: "boss", t: "HALT! Admiral Crab-Tank, keeper of coins, seller of NOTHING!" },
+    { s: "dili", t: "Admiral, the vault called. It wants its coins back." },
+    { s: "boss", t: "Tell the vault I am busy HODLING. With claws. FIRE!" } ],
+  [ { s: "boss", t: "INTRUDER. YOUR ASSETS WILL BE... FROZEN." },
+    { s: "dili", t: "Joke's on you — diamond hands don't get frostbite." },
+    { s: "boss", t: "WE SHALL SEE. INITIATING... CHILL PROTOCOL." } ],
+  [ { s: "boss", t: "Captain Moonbags speaking. You are trespassing on the moon's doorstep." },
+    { s: "dili", t: "Last vault, Captain. Hand over the stash and nobody gets rugged." },
+    { s: "boss", t: "RUGGED?! I invented the — no wait, that was the other captain. BOMBERS AWAY!" } ]
+];
+var STAGE_DIALOGUES = [
+  [ { s: "team", t: "You saved me! I was about to shill the goons' coin. It was called... BananaInu." },
+    { s: "dili", t: "George, we don't shill. We HODL. And we rescue CMOs on weekends." },
+    { s: "team", t: "Then let's make this rescue go viral. For the community! Charge!" } ],
+  [ { s: "team", t: "They made me debug their smart contract. It had 400 bugs. I named one Gerald." },
+    { s: "dili", t: "Timur, Gerald is free now too. The desert forge is scrap." },
+    { s: "team", t: "Good. Next contract I write: 'goons == rekt'. Deploying backup... me!" } ],
+  [ { s: "team", t: "I redesigned their hideout while captive. It slaps now. You're welcome." },
+    { s: "dili", t: "Alex, you redecorated a prison. Iconic. The Admiral, though..." },
+    { s: "team", t: "Already sketched his defeat. Spoiler: it's beautiful. Let's go!" } ],
+  [ { s: "team", t: "I negotiated with the ice for three days. The ice said no. Rude ice." },
+    { s: "dili", t: "Belal, your deals close themselves. Frostbite just needed a warmer pitch." },
+    { s: "team", t: "Then consider this partnership SIGNED. In ice. Forever. Charge!" } ],
+  [ { s: "team", t: "I signed three partnership deals from inside that cage. The cage was thrilled." },
+    { s: "dili", t: "Kira, only you could network from a cage. One vault left to crack — together." },
+    { s: "team", t: "Partnership status: Dili + me. Signed, sealed... now let's deliver!" } ]
+];
+var FINAL_DIALOGUE = [
+  { s: "name", who: 0, t: "The vault is ours again. Community first, always. Great work, Commando!" },
+  { s: "dili", t: "BTC, ETH and $DLI — every last coin home. WAGMI, everyone. WAGMI." },
+  { s: "name", who: 0, t: "Roll credits. And someone feed that heroic pigeon." }
 ];
 /* Funny story cards after each stage — a rescued Dlicom teammate tells the tale. */
 var TEAM = [
@@ -812,27 +956,37 @@ var TEAM = [
 ];
 var STORIES = [
   { team: 1,
-    story: "Dili smashed the cage, George dusted off his blazer, and the Jungle Juggernaut went down arguing with a banana tree. The jungle BTC stash is back with the community.",
+    story: "Dili smashed the cage, George dusted off his blazer, and the Jungle Juggernaut went down arguing with a banana tree. A pigeon stole a goon's hat on the way out. The jungle BTC stash is back with the community.",
     thanks: "“You saved me! I was about to shill the goons' coin. Thank you, Dili!” — George" },
   { team: 2,
-    story: "The fake-$DLI forge is scrap, the Mauler is parked nose-first in a sand dune, and Timur walked out debugging the sunset. It had zero bugs.",
+    story: "The fake-$DLI forge is scrap, the Mauler is parked nose-first in a sand dune, and Timur walked out debugging the sunset. It had zero bugs. Gerald the bug sends his regards.",
     thanks: "“They made me debug their smart contract. It had 400 bugs. All mine now. Thanks!” — Timur" },
-  { team: 0,
-    story: "The Admiral's vault cracked open and the whole stash poured home — BTC, ETH and $DLI, every last coin accounted for. The Crab-Tank now guards a beach café instead.",
-    thanks: "“The vault is ours again. Community first, always. Great work, Commando!” — Mohammad" }
+  { team: 3,
+    story: "The harbor stash is home, the Crab-Tank now guards a beach café (five stars, cash only), and Alex redesigned the whole pier mid-battle. It slaps now.",
+    thanks: "“I sketched the Admiral's defeat before it happened. Beautiful, no?” — Alex" },
+  { team: 4,
+    story: "Frostbite melted into a very embarrassed puddle, the mining rigs hum a community tune, and Belal closed three deals with the glacier on the walk out. The ice said yes this time.",
+    thanks: "“Deals close themselves when I show up. Even frozen ones.” — Belal" },
+  { team: 5,
+    story: "The Sky Vault cracked open above the clouds and the whole stash rained home — BTC, ETH and $DLI, every last coin. Captain Moonbags now runs a very honest moon-taxi service.",
+    thanks: "“Partnership status: rescued. Best deal I ever signed!” — Kira" }
 ];
 
 var STAGES = [
-  { len: 4300, sky: ["#2b1055", "#7597de", "#ff9d5c"], hill: "#3a2b63", hill2: "#584a8a", ground: "#4a3566", groundTop: "#7ac74f", name: "jungle" },
-  { len: 4600, sky: ["#1a0533", "#b23a48", "#ffb35c"], hill: "#5c2333", hill2: "#8a3b47", ground: "#6e3b2a", groundTop: "#e0a458", name: "desert" },
-  { len: 4600, sky: ["#050a2e", "#123a6e", "#2ec4b6"], hill: "#0d2247", hill2: "#173a6e", ground: "#1d2b4d", groundTop: "#3e7cb1", name: "harbor" }
+  { len: 6500, sky: ["#2b1055", "#7597de", "#ff9d5c"], hill: "#3a2b63", hill2: "#584a8a", ground: "#4a3566", groundTop: "#7ac74f", name: "jungle" },
+  { len: 6800, sky: ["#1a0533", "#b23a48", "#ffb35c"], hill: "#5c2333", hill2: "#8a3b47", ground: "#6e3b2a", groundTop: "#e0a458", name: "desert" },
+  { len: 6800, sky: ["#050a2e", "#123a6e", "#2ec4b6"], hill: "#0d2247", hill2: "#173a6e", ground: "#1d2b4d", groundTop: "#3e7cb1", name: "harbor" },
+  { len: 7000, sky: ["#0a1a3a", "#3a6ea5", "#bfe6ff"], hill: "#274b73", hill2: "#3f6ea3", ground: "#33507a", groundTop: "#dff4ff", name: "mine" },
+  { len: 7200, sky: ["#070226", "#2a1a6e", "#7a4ae2"], hill: "#1d1450", hill2: "#2f2370", ground: "#241a55", groundTop: "#8a76ff", name: "sky" }
 ];
 
-/* spawn script per stage: [worldX, type] */
+/* spawn script per stage: [worldX, type] — long stages, dense waves, new goons mixed in */
 var SPAWNS = [
-  [[500,"grunt"],[760,"grunt"],[1050,"cage"],[1250,"drone"],[1500,"grunt"],[1560,"grunt"],[1900,"shield"],[2150,"cage"],[2350,"drone"],[2420,"drone"],[2750,"grenadier"],[3050,"grunt"],[3120,"shield"],[3450,"turret"],[3700,"drone"],[3780,"grunt"],[3950,"cage"]],
-  [[450,"grunt"],[700,"drone"],[980,"shield"],[1200,"cage"],[1500,"grenadier"],[1750,"grunt"],[1820,"grunt"],[2100,"turret"],[2400,"drone"],[2480,"drone"],[2700,"cage"],[2950,"shield"],[3200,"grenadier"],[3500,"turret"],[3750,"drone"],[3900,"grunt"],[4100,"cage"]],
-  [[450,"drone"],[700,"grunt"],[1000,"shield"],[1250,"cage"],[1550,"turret"],[1850,"grenadier"],[2100,"drone"],[2180,"drone"],[2450,"grunt"],[2520,"shield"],[2800,"cage"],[3050,"turret"],[3350,"grenadier"],[3600,"drone"],[3680,"drone"],[3950,"shield"],[4150,"cage"]]
+  [[480,"grunt"],[720,"grunt"],[1000,"cage"],[1180,"drone"],[1420,"grunt"],[1480,"dasher"],[1750,"shield"],[1980,"grunt"],[2150,"cage"],[2320,"drone"],[2400,"bomber"],[2680,"grenadier"],[2920,"grunt"],[2980,"grunt"],[3250,"brute"],[3520,"shield"],[3780,"drone"],[3860,"dasher"],[4100,"turret"],[4380,"grenadier"],[4620,"drone"],[4700,"bomber"],[4980,"grunt"],[5050,"shield"],[5320,"brute"],[5580,"drone"],[5750,"grunt"],[5900,"cage"]],
+  [[440,"grunt"],[680,"drone"],[940,"shield"],[1150,"cage"],[1380,"dasher"],[1620,"grenadier"],[1880,"grunt"],[1950,"grunt"],[2220,"turret"],[2480,"drone"],[2560,"bomber"],[2820,"cage"],[3050,"brute"],[3320,"shield"],[3580,"grenadier"],[3840,"turret"],[4100,"drone"],[4180,"dasher"],[4450,"grenadier"],[4720,"bomber"],[4980,"grunt"],[5050,"brute"],[5320,"shield"],[5580,"drone"],[5850,"grunt"],[6050,"cage"]],
+  [[440,"drone"],[680,"grunt"],[960,"shield"],[1200,"cage"],[1450,"dasher"],[1700,"turret"],[1980,"grenadier"],[2240,"drone"],[2320,"drone"],[2580,"grunt"],[2650,"shield"],[2920,"cage"],[3180,"brute"],[3450,"turret"],[3720,"bomber"],[3980,"grenadier"],[4250,"drone"],[4330,"drone"],[4600,"shield"],[4860,"brute"],[5120,"grenadier"],[5380,"dasher"],[5650,"bomber"],[5920,"shield"],[6150,"cage"]],
+  [[440,"grunt"],[680,"shield"],[940,"drone"],[1180,"cage"],[1440,"brute"],[1700,"dasher"],[1960,"grenadier"],[2220,"bomber"],[2480,"grunt"],[2550,"shield"],[2820,"cage"],[3080,"turret"],[3340,"brute"],[3600,"drone"],[3680,"bomber"],[3950,"grenadier"],[4220,"shield"],[4480,"dasher"],[4750,"turret"],[5010,"brute"],[5270,"drone"],[5540,"grenadier"],[5800,"bomber"],[6060,"grunt"],[6280,"cage"]],
+  [[440,"drone"],[660,"dasher"],[920,"grunt"],[1160,"cage"],[1420,"bomber"],[1680,"shield"],[1940,"brute"],[2200,"drone"],[2280,"bomber"],[2540,"grenadier"],[2800,"cage"],[3060,"turret"],[3320,"dasher"],[3580,"brute"],[3840,"bomber"],[4100,"grenadier"],[4360,"drone"],[4440,"drone"],[4700,"shield"],[4960,"brute"],[5220,"turret"],[5480,"bomber"],[5740,"grenadier"],[6000,"dasher"],[6260,"shield"],[6480,"cage"]]
 ];
 var spawnPtr = 0;
 var emptyT = 0; /* frames with an empty field and spawns still pending — drives the anti-stall fallback */
@@ -881,11 +1035,16 @@ function efire(a, b) { return Math.round(irnd(a, b) * diffMul()); }
 function ebMul() { return (stageIdx === 0 && P && P.x < STAGES[0].len * 0.55) ? 0.85 : 1; }
 function spawnEnemy(type, x) {
   var base = { type: type, x: x, w: 30, h: 46, vx: 0, vy: 0, t: rnd(0, 100), fireCd: Math.round(irnd(90, 160) * diffMul()), flash: 0, dead: false };
-  if (type === "grunt")     { base.hp = 3; base.y = GROUND - 46; base.speed = rnd(0.7, 1.1); }
+  if (type === "grunt")     { base.hp = 3; base.y = GROUND - 46; base.speed = rnd(0.7, 1.1); if (Math.random() < 0.06) base.surrender = true; /* waves a white flag instead of fighting */ }
   if (type === "shield")    { base.hp = 6; base.y = GROUND - 48; base.h = 48; base.speed = 0.55; base.shieldHp = 4; }
   if (type === "grenadier") { base.hp = 4; base.y = GROUND - 46; base.speed = 0.4; }
   if (type === "drone")     { base.hp = 2; base.w = 38; base.h = 22; base.y = rnd(140, 215); base.baseY = base.y; base.speed = rnd(1.1, 1.5); }
   if (type === "turret")    { base.hp = 8; base.w = 40; base.h = 44; base.y = GROUND - 44; base.speed = 0; }
+  if (type === "brute")     { base.hp = 11; base.w = 44; base.h = 58; base.y = GROUND - 58; base.speed = 0.5; base.mode = "walk"; base.modeT = 0; } /* charging brute */
+  if (type === "bomber")    { base.hp = 3; base.w = 42; base.h = 24; base.y = rnd(105, 165); base.baseY = base.y; base.speed = rnd(0.8, 1.2); } /* flying bomber */
+  if (type === "dasher")    { base.hp = 2; base.y = GROUND - 46; base.speed = rnd(1.9, 2.4); base.modeT = 0; } /* zig-zag sprinter */
+  if (type === "golden")    { base.hp = 3; base.y = GROUND - 46; base.speed = 1.6; } /* the legendary Golden Goon */
+  if (endless) { base.hp += Math.floor(endlessLevel / 3); }
   base.maxHp = base.hp;
   enemies.push(base);
   /* now and then a fresh goon marches in shouting crypto nonsense */
@@ -899,12 +1058,17 @@ function spawnBoss(stage) {
   var d = BOSS_DEFS[stage];
   boss = {
     kind: d.kind, name: d.name,
-    x: cam + W + 60, w: d.w, h: d.h, y: GROUND - d.h, hp: bossRetryHp > 0 ? Math.min(d.hp, bossRetryHp) : d.hp, maxHp: d.hp,
+    /* SAFE SPAWN: always well off-screen and at least 460px from Dili — never on top of him */
+    x: Math.max(cam + W + 60, P.x + 460), w: d.w, h: d.h, y: GROUND - d.h, hp: bossRetryHp > 0 ? Math.min(d.hp, bossRetryHp) : d.hp, maxHp: d.hp,
     vx: -1.1, vy: 0, fireCd: 100, spawnCd: 320, flash: 0, t: 0, phase: 1, dead: false,
     mode: "enter", modeT: 0, atkCd: 150, dir: -1, taunted2: false, slamLanded: false, tauntCd: irnd(260, 380)
   };
+  /* a boss-fight weapon lands at Dili's feet — nobody fights a boss with a pea-shooter */
+  var bw = ["rocket", "spread", "mg"][stage % 3];
+  dropPickup(clamp(P.x + 60, 20, STAGES[stage].len - 50), GROUND - 72, bw);
   popup(W / 2, 132, "⚠ " + boss.name + " ⚠", "#ff5c5c", true);
   popup(W / 2, 168, d.taunt, "#ffd23e", true);
+  popup(P.x + 15, P.y - 34, WEAPONS[bw].label + " dropped for the boss fight! Grab it!", "#3ee6c4", false, 130);
   SFX.roar();
 }
 function dropPickup(x, y, kind) {
@@ -917,8 +1081,18 @@ function coinKind() { var r = Math.random(); return r < 0.55 ? "coin" : r < 0.80
 /* ---------------- RESET / FLOW ---------------- */
 function resetRun() {
   score = 0; totalKills = 0; totalRescues = 0; dliCoins = 0; btcCoins = 0; ethCoins = 0; stageIdx = 0;
-  allies = [];
-  P = newPlayer(); showIntro(0);
+  allies = []; shieldT = 0; doubleT = 0; magnetT = 0;
+  P = newPlayer(); P.grenades = 5; /* every fresh run starts with a FULL grenade belt — no exceptions */
+  showIntro(0);
+}
+function startEndless() {
+  endless = true; score = 0; totalKills = 0; totalRescues = 0; dliCoins = 0; btcCoins = 0; ethCoins = 0;
+  allies = []; shieldT = 0; doubleT = 0; magnetT = 0;
+  endlessT = 0; endlessSpawnT = 0; endlessLevel = 1; endlessBossT = 60 * 75;
+  P = newPlayer();
+  stageIdx = irnd(0, 4);
+  loadStage(stageIdx);
+  popup(W / 2, 130, "♾️ ENDLESS MODE — survive, stack combos, beat " + hiScore + "!", "#3ee6c4", true);
 }
 /* Funny mission briefing card before each stage — the crypto vault heist story. */
 function showIntro(i) {
@@ -926,12 +1100,27 @@ function showIntro(i) {
   document.body.classList.remove("playing");
   cam = 0; boss = null; bossMode = false; enemies = []; ebullets = []; bullets = []; grenades = []; popups = [];
   P.x = 90; P.y = GROUND - 52; P.vx = 0; P.vy = 0; P.dead = false; P.crouch = false;
-  ["storyScreen", "endScreen", "pauseScreen", "titleScreen"].forEach(function (id) { document.getElementById(id).classList.add("hidden"); });
-  document.getElementById("introKicker").textContent = "The Vault Heist — Mission " + (i + 1) + " of 3";
+  ["storyScreen", "endScreen", "pauseScreen", "titleScreen", "cutScreen", "dialogueScreen"].forEach(function (id) { document.getElementById(id).classList.add("hidden"); });
+  document.getElementById("introKicker").textContent = "The Vault Heist — Mission " + (i + 1) + " of 5";
   document.getElementById("introTitle").textContent = STAGE_INTROS[i];
   document.getElementById("introText").textContent = STAGE_SUBS[i];
-  document.getElementById("introScreen").classList.remove("hidden");
+  /* MOVIE MODE: the chapter title card plays first, then the briefing */
+  document.body.classList.add("movie");
+  document.getElementById("chapterKicker").textContent = "Chapter " + (i + 1) + " of 5";
+  document.getElementById("chapterTitle").textContent = CHAPTER_NAMES[i];
+  document.getElementById("chapterSub").textContent = CHAPTER_SUBS[i];
+  document.getElementById("chapterScreen").classList.remove("hidden");
+  document.getElementById("introScreen").classList.add("hidden");
+  if (chapterTimer) clearTimeout(chapterTimer);
+  chapterTimer = setTimeout(function () { dismissChapter(); }, 2600);
   paused = false; syncPauseBtn(); syncTopbar();
+}
+function dismissChapter() {
+  if (chapterTimer) { clearTimeout(chapterTimer); chapterTimer = null; }
+  var ch = document.getElementById("chapterScreen");
+  if (ch.classList.contains("hidden")) return;
+  ch.classList.add("hidden");
+  if (state === "intro") document.getElementById("introScreen").classList.remove("hidden");
 }
 function saveBest() {
   hiScore = Math.max(hiScore, score);
@@ -948,28 +1137,31 @@ function playerBox() {
   return { x: P.x, y: P.y, w: P.w, h: P.h };
 }
 function loadStage(i) {
-  stageIdx = i; state = "play"; cam = 0; stageTime = 0; spawnPtr = 0; emptyT = 0; bossMode = false; boss = null;
+  stageIdx = i; state = "play"; cam = 0; stageTime = 0; spawnPtr = 0; emptyT = 0; bossMode = false; boss = null; pendingBoss = false;
   checkpointX = 90; stageAllyDone = false; bossRetryHp = 0;
-  bullets = []; ebullets = []; grenades = []; enemies = []; pickups = []; cages = []; popups = [];
-  document.getElementById("storyScreen").classList.add("hidden");
-  document.getElementById("endScreen").classList.add("hidden");
-  document.getElementById("introScreen").classList.add("hidden");
+  eventT = irnd(900, 1400); argueT = irnd(700, 1100);
+  bullets = []; ebullets = []; grenades = []; enemies = []; pickups = []; cages = []; popups = []; crates = [];
+  document.body.classList.remove("movie");
+  ["storyScreen", "endScreen", "introScreen", "chapterScreen", "cutScreen", "dialogueScreen"].forEach(function (id) { document.getElementById(id).classList.add("hidden"); });
   P.x = 90; P.y = GROUND - 52; P.vx = 0; P.vy = 0; P.hp = P.maxHp; P.inv = 90; P.weapon = "pistol"; P.weaponT = 0; P.grenades = Math.max(P.grenades, 5); P.streak = 0; P.crouch = false; P.dead = false;
   allies.forEach(function (a, ai2) { a.x = 40 - ai2 * 46; a.y = GROUND - 44; a.fireCd = 50 + ai2 * 14; });
-  /* a trail of coins through the stage — something shiny in every stretch */
-  for (var cxx = 620; cxx < STAGES[i].len - 420; cxx += 540) dropPickup(cxx + irnd(-50, 50), GROUND - 72, coinKind());
-  if (i > 0 && P.lives < 5) { P.lives++; popup(W / 2, 150, "Stage bonus: +1 Life ❤", "#7dff8a", true); }
+  /* a DENSE trail of coins through the stage — something shiny in every stretch */
+  for (var cxx = 560; cxx < STAGES[i].len - 420; cxx += 330) dropPickup(cxx + irnd(-40, 40), GROUND - 72, coinKind());
+  /* smashable crates hide power-ups */
+  for (var crx = 900; crx < STAGES[i].len - 500; crx += 1050) crates.push({ x: crx + irnd(-60, 60), y: GROUND - 34, w: 34, h: 34, hp: 2, flash: 0 });
+  if (i > 0 && !endless && P.lives < 5) { P.lives++; popup(W / 2, 150, "Stage bonus: +1 Life ❤", "#7dff8a", true); }
   paused = false; syncPauseBtn(); syncTopbar();
   document.body.classList.add("playing");
 }
 /* A fall with lives left: back to the checkpoint, run progress intact. */
 function respawnAtCheckpoint() {
   var st = STAGES[stageIdx];
-  P.lives--; P.dead = false; P.deadT = 0; P.hp = P.maxHp; P.inv = 160; P.streak = 0; P.crouch = false;
+  P.lives--; P.dead = false; P.deadT = 0; P.hp = P.maxHp; P.inv = 190; P.streak = 0; P.crouch = false; /* ~3.2s of invincibility — time to breathe and aim */
   P.x = clamp(checkpointX, 30, st.len - 60); P.y = GROUND - 52; P.vx = 0; P.vy = 0;
   cam = clamp(P.x - 300, 0, Math.max(0, st.len - W));
   ebullets = []; grenades = [];
-  enemies = enemies.filter(function (e) { return Math.abs((e.x + e.w / 2) - (P.x + 15)) > 520; });
+  /* SAFE RESPAWN: everything hostile within 700px is cleared out — no spawning into live fire */
+  enemies = enemies.filter(function (e) { return Math.abs((e.x + e.w / 2) - (P.x + 15)) > 700; });
   if (bossMode) { if (boss && !boss.dead) bossRetryHp = boss.hp; boss = null; bossMode = false; }
   var list = SPAWNS[stageIdx]; spawnPtr = 0;
   while (spawnPtr < list.length && list[spawnPtr][0] <= P.x + 80) spawnPtr++;
@@ -993,18 +1185,92 @@ function showStory(i) {
   document.getElementById("storyRole").textContent = tm.role + " — back in the fight!";
   document.getElementById("storyText").textContent = s.story;
   document.getElementById("storyThanks").textContent = s.thanks;
-  document.getElementById("storyBtn").textContent = i >= 2 ? "See Your Victory 🏆" : "Next Mission ▶";
+  document.getElementById("storyBtn").textContent = i >= 4 ? "See Your Victory 🏆" : "Next Mission ▶";
   document.getElementById("storyScreen").classList.remove("hidden");
   syncTopbar();
 }
-function rankFor(sc) {
-  if (sc >= 12000) return "Rank: DILI LEGEND 👑";
-  if (sc >= 8000) return "Rank: Moon Walker 🚀";
-  if (sc >= 4500) return "Rank: Diamond Hands 💎";
-  if (sc >= 2000) return "Rank: HODL Hero 🛡️";
-  if (sc >= 800) return "Rank: Dip Buyer 📈";
-  return "Rank: Paper Hands 📄 — shake it off!";
+/* ---------------- MOVIE SCENES: dialogue + animated cutscenes (engine-built, no video files) ---------------- */
+var BOSS_FACES = ["🦍", "🦂", "🦀", "🧊", "🌕"];
+function startDialogue(lines, done) {
+  dlgLines = lines; dlgIdx = 0; dlgDone = done || null; state = "dialogue";
+  document.body.classList.add("movie"); document.body.classList.remove("playing");
+  document.getElementById("dialogueScreen").classList.remove("hidden");
+  showDlgLine();
 }
+function showDlgLine() {
+  var L = dlgLines[dlgIdx]; if (!L) { endDialogue(); return; }
+  var img = document.getElementById("dlgImg"), di = document.getElementById("dlgDili"), bo = document.getElementById("dlgBoss");
+  img.style.display = "none"; di.style.display = "none"; bo.style.display = "none";
+  var name = "Dili";
+  if (L.s === "dili") { di.style.display = "flex"; name = "Dili"; }
+  else if (L.s === "boss") { bo.style.display = "flex"; bo.textContent = BOSS_FACES[stageIdx] || "🤖"; name = BOSS_DEFS[stageIdx].name; }
+  else { var tm = TEAM[L.s === "name" ? L.who : STORIES[stageIdx].team]; img.src = tm.img; img.alt = tm.name; img.style.display = "block"; name = tm.name.split(" ")[0]; }
+  document.getElementById("dlgName").textContent = name;
+  dlgFull = L.t; dlgTypeT = 0;
+  var el = document.getElementById("dlgText"); el.textContent = "";
+  if (window.__dlgTyper) clearInterval(window.__dlgTyper);
+  window.__dlgTyper = setInterval(function () {
+    dlgTypeT += 2; el.textContent = dlgFull.slice(0, dlgTypeT);
+    if (Math.random() < 0.5) beep(rnd(500, 700), 0.03, "square", 0.02);
+    if (dlgTypeT >= dlgFull.length) clearInterval(window.__dlgTyper);
+  }, 24);
+}
+function advanceDialogue() {
+  var el = document.getElementById("dlgText");
+  if (dlgTypeT < dlgFull.length) { /* first tap completes the line */
+    if (window.__dlgTyper) clearInterval(window.__dlgTyper);
+    dlgTypeT = dlgFull.length; el.textContent = dlgFull; return;
+  }
+  dlgIdx++; SFX.pickup();
+  if (dlgIdx >= dlgLines.length) endDialogue(); else showDlgLine();
+}
+function endDialogue() {
+  if (window.__dlgTyper) clearInterval(window.__dlgTyper);
+  document.getElementById("dialogueScreen").classList.add("hidden");
+  document.body.classList.remove("movie");
+  var d = dlgDone; dlgLines = null; dlgDone = null;
+  if (d) d();
+}
+function startCutscene(i) {
+  state = "cutscene";
+  document.body.classList.add("movie"); document.body.classList.remove("playing");
+  var s = STORIES[i], tm = TEAM[s.team];
+  var img = document.getElementById("cutImg");
+  img.src = tm.img; img.alt = tm.name + ", " + tm.role;
+  document.getElementById("cutName").textContent = "★ Starring " + tm.name + " & Dili ★";
+  var el = document.getElementById("cutText"); el.textContent = "";
+  var full = s.story, n = 0;
+  if (window.__cutTyper) clearInterval(window.__cutTyper);
+  window.__cutTyper = setInterval(function () { n += 2; el.textContent = full.slice(0, n); if (n >= full.length) clearInterval(window.__cutTyper); }, 30);
+  document.getElementById("cutScreen").classList.remove("hidden");
+  SFX.rescue();
+  if (cutTimer) clearTimeout(cutTimer);
+  cutTimer = setTimeout(function () { advanceCutscene(); }, 13000); /* ~13s scene, skippable any time */
+}
+function advanceCutscene() {
+  if (state !== "cutscene") return;
+  if (cutTimer) { clearTimeout(cutTimer); cutTimer = null; }
+  if (window.__cutTyper) clearInterval(window.__cutTyper);
+  document.getElementById("cutScreen").classList.add("hidden");
+  var i = stageIdx;
+  if (i >= 4) startDialogue(FINAL_DIALOGUE, function () { showStory(i); });
+  else startDialogue(STAGE_DIALOGUES[i], function () { showStory(i); });
+}
+function rankFor(sc) {
+  if (sc >= 30000) return "Rank: DILI LEGEND 👑";
+  if (sc >= 20000) return "Rank: Moon Walker 🚀";
+  if (sc >= 12000) return "Rank: Diamond Hands 💎";
+  if (sc >= 6000) return "Rank: HODL Hero 🛡️";
+  if (sc >= 2500) return "Rank: Dip Buyer 📈";
+  if (sc >= 900) return "Rank: NGMI No More 📄";
+  return "Rank: Paper Hands 📄 — shake it off, go again!";
+}
+var OVER_QUIPS = [
+  "The goons got your coins... this time. HODL the streak and go again!",
+  "Down, but diamond hands never stay down. NGMI? Not you. Again!",
+  "The pigeon saw everything. It believes in you. So do we. Again!",
+  "Paper hands fold. Legends reload. Again!"
+];
 function endGame(win) {
   state = win ? "win" : "over";
   document.body.classList.remove("playing");
@@ -1014,12 +1280,12 @@ function endGame(win) {
   if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
   saveBest();
   var t = document.getElementById("endTitle"), q = document.getElementById("endQuip"), s = document.getElementById("endStats");
-  t.textContent = win ? "🏆 Vault Recovered! DILI LEGEND!" : "💥 DILI Is Down!";
+  t.textContent = win ? "🎬 THE END — VAULT RECOVERED!" : (endless ? "♾️ Endless Run Over!" : "💥 DILI Is Down!");
   t.style.color = win ? "#ffd23e" : "#ff7b6b";
-  document.getElementById("endRank").textContent = rankFor(score);
-  q.textContent = win ? "VAULT RECOVERED! BTC, ETH and $DLI are home. Dili did it. WAGMI!" :
-                        "The goons got your coins... this time. HODL the streak and go again!";
-  var bsMult = P.bestStreak > 0 ? 1 + Math.floor(P.bestStreak / 5) : 0;
+  document.getElementById("endRank").textContent = rankFor(score) + (win ? "  ·  TO BE CONTINUED… in Endless Mode ♾️" : "");
+  q.textContent = win ? "VAULT RECOVERED! BTC, ETH and $DLI are home. Dili did it. WAGMI! (The pigeon got a medal. It earned it.)" :
+                        (endless ? "Endless Level " + endlessLevel + " reached! The goons are exhausted. Chase that Best score again!" : OVER_QUIPS[irnd(0, OVER_QUIPS.length - 1)]);
+  var bsMult = P.bestStreak >= 15 ? 5 : P.bestStreak >= 10 ? 3 : P.bestStreak >= 5 ? 2 : 1;
   s.innerHTML = "Score <b>" + score + "</b> &nbsp;·&nbsp; Best <b>" + hiScore + "</b><br>" +
     "Kills <b>" + totalKills + "</b> &nbsp;·&nbsp; POWs Rescued <b>" + totalRescues + "</b> &nbsp;·&nbsp; $DLI Coins <b>" + dliCoins + "</b><br>" +
     "BTC <b>" + btcCoins + "</b> &nbsp;·&nbsp; ETH <b>" + ethCoins + "</b> &nbsp;·&nbsp; Best Streak <b>×" + bsMult + "</b> (" + P.bestStreak + " kills)" +
@@ -1047,6 +1313,12 @@ function endGame(win) {
 /* ---------------- UPDATE ---------------- */
 function hurtPlayer(dmg) {
   if (P.inv > 0 || P.dead) return;
+  if (shieldT > 0) { /* the shield power-up eats the hit — and says so, smugly */
+    shieldT = 0; P.inv = 70;
+    popup(P.x + 15, P.y - 20, "🛡️ Shield blocked it! Nice try!", "#8fb8ff", false, 95);
+    burst(P.x + 15, P.y + 24, 12, ["#8fb8ff", "#ffffff"], 3.4, 20, 0.05);
+    SFX.streak(); return;
+  }
   P.hp -= dmg; P.inv = 80; P.hurtT = 12; P.streak = 0; hurtFlash = 14;
   SFX.hurt(); addShake(7); hitStop = Math.max(hitStop, 4);
   burst(P.x + 15, P.y + 24, 12, ["#ff5c5c", "#fff"], 4, 24, 0.2);
@@ -1060,17 +1332,31 @@ function hurtPlayer(dmg) {
   }
   if (P.hp <= 0) { P.dead = true; P.deadT = 0; explosion(P.x + 15, P.y + 26, false); }
 }
-function streakMult() { return 1 + Math.floor(P.streak / 5); }
+function streakMult() { /* combo tiers: x1, x2, x3, x5 — shown BIG in the HUD */
+  if (P.streak >= 15) return 5;
+  if (P.streak >= 10) return 3;
+  if (P.streak >= 5) return 2;
+  return 1;
+}
 function killEnemy(e, idx) {
   e.dead = true; totalKills++; P.streak++; P.bestStreak = Math.max(P.bestStreak, P.streak);
-  var pts = (e.type === "turret" ? 300 : e.type === "shield" ? 200 : e.type === "drone" ? 150 : 100) * streakMult();
+  var basePts = e.type === "golden" ? 1000 : e.type === "turret" ? 300 : e.type === "brute" ? 350 : e.type === "shield" ? 200 : e.type === "drone" || e.type === "bomber" ? 150 : 100;
+  var pts = basePts * streakMult();
   score += pts;
   popup(e.x + e.w / 2, e.y - 8, "+" + pts, streakMult() > 1 ? "#3ee6c4" : "#ffd23e");
+  if (e.type === "golden") popup(W / 2, 150, "🌟 GOLDEN GOON DOWN! +" + pts + " 🌟", "#ffd23e", true);
+  if (e.surrender) popup(e.x + e.w / 2, e.y - 34, "He surrendered! ...Rude, Dili. 😅", "#ffffff");
+  if (Math.random() < 0.3) popup(e.x + e.w / 2, e.y - 30, BOOM_WORDS[irnd(0, BOOM_WORDS.length - 1)], "#ff9d2e", false, 70);
   if (P.streak > 0 && P.streak % 10 === 0) { popup(P.x + 15, P.y - 26, LINERS[irnd(0, LINERS.length - 1)], "#ff9d2e"); SFX.streak(); }
-  explosion(e.x + e.w / 2, e.y + e.h / 2, e.type === "turret");
+  if (P.streak === 5 || P.streak === 10 || P.streak === 15) { popup(W / 2, 120, "🔥 COMBO ×" + streakMult() + "! 🔥", "#ff5c5c", true); SFX.streak(); }
+  explosion(e.x + e.w / 2, e.y + e.h / 2, e.type === "turret" || e.type === "brute");
   var dropRoll = Math.random();
-  if (dropRoll < 0.30) dropPickup(e.x + 4, e.y + 10, coinKind());
-  else if (e.type !== "turret" && dropRoll < 0.42) {
+  if (dropRoll < 0.28) dropPickup(e.x + 4, e.y + 10, coinKind());
+  else if (dropRoll < 0.36) { /* power-ups: shield, double coins, magnet, weapons */
+    var pool = ["shield", "double", "magnet", "spread", "mg", "rocket"];
+    dropPickup(e.x + 4, e.y + 10, pool[irnd(0, pool.length - 1)]);
+  }
+  else if (e.type !== "turret" && dropRoll < 0.47) {
     var kind2 = Math.random();
     var dk = P.hp <= 2 ? (kind2 < 0.55 ? "medkit" : kind2 < 0.82 ? "grenade" : "heart")
                        : (kind2 < 0.34 ? "medkit" : kind2 < 0.67 ? "grenade" : "heart");
@@ -1089,7 +1375,7 @@ function playerShoot() {
     var bestD = null, bestDist = 1e9;
     for (var di = 0; di < enemies.length; di++) {
       var de = enemies[di];
-      if (de.type !== "drone") continue;
+      if (de.type !== "drone" && de.type !== "bomber") continue;
       var ddx = (de.x + de.w / 2) - (P.x + 15), ddy = (P.y + 8) - (de.y + de.h / 2);
       var dd = Math.abs(ddx);
       if (ddy > 10 && dd < 300 && dd < bestDist) { bestDist = dd; bestD = Math.atan2(-ddy, ddx); }
@@ -1138,11 +1424,64 @@ function update() {
   /* boss trigger — POW rescues are a bonus, never a gate: clear the wave and the boss comes.
      Stragglers left far behind when the wave is done are out of the fight (they flee),
      so a skipped goon can never stall the boss. */
-  if (!bossMode && spawnPtr >= list.length) {
+  if (!bossMode && !endless && spawnPtr >= list.length) {
     for (var ci9 = enemies.length - 1; ci9 >= 0; ci9--) {
       if (Math.abs(enemies[ci9].x - P.x) > 750 || enemies[ci9].x < cam - 320 || enemies[ci9].x > cam + W + 320) enemies.splice(ci9, 1);
     }
-    if (enemies.length === 0) { bossMode = true; spawnBoss(stageIdx); }
+    if (enemies.length === 0 && !pendingBoss) {
+      /* MOVIE MOMENT: the boss talks before it fights — tap through the scene */
+      pendingBoss = true; bossMode = true;
+      startDialogue(BOSS_DIALOGUES[stageIdx], function () {
+        state = "play"; document.body.classList.add("playing");
+        pendingBoss = false; spawnBoss(stageIdx);
+      });
+      return;
+    }
+  }
+  /* ---- ENDLESS MODE: endless waves, rising difficulty, a boss every ~75s ---- */
+  if (endless && state === "play") {
+    endlessT++;
+    if (endlessT % (60 * 20) === 0) { endlessLevel++; popup(W / 2, 120, "♾️ Endless Level " + endlessLevel + " — they are NOT happy!", "#ff9d2e", true); }
+    endlessSpawnT--;
+    if (!bossMode && endlessSpawnT <= 0 && enemies.length < 4 + endlessLevel) {
+      endlessSpawnT = Math.max(38, 120 - endlessLevel * 9);
+      var etypes = ["grunt", "drone", "shield", "grenadier", "dasher", "bomber", "brute", "turret"];
+      spawnEnemy(etypes[irnd(0, Math.min(etypes.length - 1, 2 + endlessLevel))], cam + W + irnd(30, 160));
+      if (Math.random() < 0.1) spawnEnemy("golden", cam + W + 60);
+    }
+    if (!bossMode && --endlessBossT <= 0) {
+      endlessBossT = 60 * 75; bossMode = true; spawnBoss(stageIdx);
+      popup(W / 2, 110, "♾️ Endless boss! " + BOSS_DEFS[stageIdx].name + " wants a rematch!", "#ff5c5c", true);
+    }
+    if (Math.random() < 0.004) dropPickup(cam + irnd(80, W - 80), GROUND - 72, coinKind());
+  }
+  /* ---- power-up timers ---- */
+  if (shieldT > 0) shieldT--;
+  if (doubleT > 0) doubleT--;
+  if (magnetT > 0) magnetT--;
+  /* ---- SURPRISE EVENTS: something unexpected, every stage, on a clock ---- */
+  if (!bossMode) {
+    if (--eventT <= 0) {
+      eventT = irnd(1100, 1700);
+      var ev = irnd(0, 2);
+      if (ev === 0) { /* COIN RAIN */
+        popup(W / 2, 120, "🪙 COIN RAIN! The sky is paying out! 🪙", "#ffd23e", true); SFX.coin();
+        for (var evi = 0; evi < 9; evi++) dropPickup(cam + irnd(40, W - 40), rnd(60, 160), coinKind());
+      } else if (ev === 1) { /* PIGEON AIRSTRIKE */
+        popup(W / 2, 120, "🕊️ PIGEON AIRSTRIKE! That bird has HAD IT!", "#3ee6c4", true);
+        for (var evj = 0; evj < enemies.length; evj++) setTimeout(function (ei2) { return function () { if (enemies[ei2]) { explosion(enemies[ei2].x + 15, enemies[ei2].y + 20, false); enemies[ei2].hp -= 3; if (enemies[ei2].hp <= 0 && !enemies[ei2].dead) killEnemy(enemies[ei2], ei2); } }; }(evj), evj * 180);
+        setTimeout(function () { popup(P.x + 15, P.y - 34, "The pigeon stole a goon's hat! +100 🧢", "#ffe9b0"); score += 100; }, 500);
+      } else { /* GOLDEN GOON */
+        popup(W / 2, 120, "🌟 A GOLDEN GOON appeared! Catch him — 1000 points! 🌟", "#ffd23e", true);
+        spawnEnemy("golden", cam + W - 60);
+      }
+    }
+    if (--argueT <= 0 && enemies.length >= 2) { /* two goons argue mid-fight instead of working */
+      argueT = irnd(800, 1400);
+      var pair = GOON_ARGUE[irnd(0, GOON_ARGUE.length - 1)];
+      popup(enemies[0].x + 15, enemies[0].y - 20, "“" + pair[0] + "”", "#ff9d2e", false, 130);
+      popup(enemies[1].x + 15, enemies[1].y - 20, "“" + pair[1] + "”", "#ffb3c8", false, 130);
+    }
   }
 
   /* ---- player ---- */
@@ -1157,7 +1496,8 @@ function update() {
   if (grenadeBuf > 0) grenadeBuf--;
   if (!P.dead) {
     if (inp.up) aimLatch = 26; else if (aimLatch > 0) aimLatch--;
-    if (inp.down) crouchLatch = 22; else if (crouchLatch > 0) crouchLatch--;
+    if (inp.down) crouchLatch = 30; else if (crouchLatch > 0) crouchLatch--; /* a tap crouches for a full half-second — clearly visible */
+    if (P.crouch !== !!((inp.down || crouchLatch > 0) && P.onGround) && inp.down && P.onGround && !P.crouch) popup(P.x + 15, P.y - 16, "Crouching! ▼", "#8fb8ff", false, 34);
     P.aimUp = (inp.up || aimLatch > 0) && P.onGround;
     P.crouch = !!((inp.down || crouchLatch > 0) && P.onGround);
     var sp = 3.4;
@@ -1173,7 +1513,9 @@ function update() {
     P.vy = Math.min(15, P.vy + 0.62);
     P.x += P.vx; P.y += P.vy;
     var maxX = bossMode ? cam + W - 60 : st.len - 40;
+    if (bossMode && boss && !boss.dead) maxX = Math.min(maxX, boss.x - 54); /* Dili can never be pushed inside the boss */
     P.x = clamp(P.x, cam + 4, maxX);
+    if (bossMode && boss && !boss.dead && P.x + P.w > boss.x - 8) P.x = boss.x - 8 - P.w; /* hard separation, always */
     if (P.y >= GROUND - P.h) { P.y = GROUND - P.h; P.vy = 0; P.onGround = true; }
     if (P.fireCd > 0) P.fireCd--;
     if (inp.fire && P.fireCd <= 0) { playerShoot(); P.fireCd = WEAPONS[P.weapon].rate; }
@@ -1192,9 +1534,9 @@ function update() {
     if (P.deadT === 55) { if (P.lives > 1) respawnAtCheckpoint(); else endGame(false); }
   }
 
-  /* mid-stage checkpoint: cross the halfway mark once and falls stop costing the whole stage */
+  /* mid-stage checkpoint: ONE fixed point per stage — exactly halfway, every run, no drift */
   if (!bossMode && checkpointX < st.len / 2 && P.x >= st.len / 2) {
-    checkpointX = P.x;
+    checkpointX = Math.floor(st.len / 2);
     popup(W / 2, 138, "🚩 Checkpoint reached!", "#7dff8a", true);
     SFX.streak();
   }
@@ -1237,6 +1579,21 @@ function update() {
         break;
       }
     }
+    if (!consumed) for (var cri = 0; cri < crates.length; cri++) { /* smashable loot crates */
+      var cr = crates[cri];
+      if (hit(b, cr)) {
+        cr.hp -= b.dmg; cr.flash = 5; consumed = true;
+        burst(b.x, b.y, 4, ["#d9a05a", "#8a5a2b"], 3, 12, 0.15);
+        if (cr.hp <= 0) {
+          burst(cr.x + 17, cr.y + 17, 14, ["#d9a05a", "#ffd23e"], 3.6, 22, 0.15); SFX.pop();
+          var cpool = ["shield", "double", "magnet", "spread", "mg", "rocket", "medkit", "grenade", "heart"];
+          dropPickup(cr.x + 4, cr.y - 6, cpool[irnd(0, cpool.length - 1)]);
+          popup(cr.x + 17, cr.y - 12, "Crate smashed! 📦", "#ffd23e");
+          crates.splice(cri, 1);
+        }
+        break;
+      }
+    }
     if (consumed || b.life <= 0 || b.x < cam - 60 || b.x > cam + W + 60 || b.y < -30 || b.y > GROUND + 4) bullets.splice(bi, 1);
   }
   function aoeDamage(x, y, r, dmg) {
@@ -1271,6 +1628,7 @@ function update() {
     setTimeout(function () { if (boss) explosion(boss.x + rnd(30, 160), boss.y + rnd(10, 90), true); }, 160);
     setTimeout(function () { if (boss) explosion(boss.x + rnd(30, 160), boss.y + rnd(10, 90), true); }, 340);
     popup(boss.x + 95, boss.y - 22, "Boss Down! +2000", "#ffd23e");
+    popup(boss.x + 95, boss.y - 52, "😭 “I'm not crying, YOU'RE crying!”", "#ffb3c8", false, 150); /* every boss cries. Every single one. */
     setTimeout(function () {
       boss = null;
       state = "stageclear"; clearTimer = 0;
@@ -1283,6 +1641,13 @@ function update() {
     var q = ebullets[qi]; q.x += q.vx; q.y += q.vy; if (q.arc) q.vy += 0.3;
     var qb = { x: q.x - 4, y: q.y - 4, w: 8, h: 8 };
     if (!P.dead && P.inv <= 0 && hit(qb, playerBox())) { hurtPlayer(1); ebullets.splice(qi, 1); continue; }
+    /* NEAR-MISS BONUS: a bullet that whistles past Dili's helmet pays out */
+    if (!P.dead && !q.nearDone && !q.wave) {
+      var ndx = q.x - (P.x + 15), ndy = q.y - (P.y + 22);
+      var nd = ndx * ndx + ndy * ndy;
+      if (nd < 34 * 34) q.nearClose = true;
+      if (q.nearClose && nd > 52 * 52) { q.nearDone = true; score += 50; popup(P.x + 15, P.y - 22, "So close! +50 😎", "#3ee6c4", false, 70); SFX.streak(); }
+    }
     if (q.wave) { /* ground shockwave: only jumping clears it */
       if (q.x < cam - 60 || q.x > cam + W + 60) ebullets.splice(qi, 1);
       continue;
@@ -1310,8 +1675,36 @@ function update() {
     var dxp = (P.x + 15) - (e.x + e.w / 2), adx = Math.abs(dxp);
     var spd = e.speed * (adx > 650 ? 3 : 1); /* far-behind goons hustle to catch up — no dead air */
     if (e.type === "grunt") {
-      if (adx > 170) e.x += Math.sign(dxp) * spd; else if (adx < 90) e.x -= Math.sign(dxp) * spd * 0.5;
-      if (e.fireCd-- <= 0 && adx < 460 && !P.dead) { e.fireCd = efire(115, 190); ebullets.push({ x: e.x + e.w / 2, y: e.y + 16, vx: Math.sign(dxp) * 4.2 * ebMul(), vy: 0 }); beep(320, 0.07, "square", 0.04, 140); }
+      if (e.surrender) { /* white-flag goon: no fighting, just vibes and regret */
+        if (!e.cried && adx < 320) { e.cried = true; popup(e.x + 15, e.y - 22, "I surrender! Take the coins, not me! 🏳️", "#ffffff", false, 140); }
+      } else {
+        if (adx > 170) e.x += Math.sign(dxp) * spd; else if (adx < 90) e.x -= Math.sign(dxp) * spd * 0.5;
+        if (e.fireCd-- <= 0 && adx < 460 && !P.dead) { e.fireCd = efire(115, 190); ebullets.push({ x: e.x + e.w / 2, y: e.y + 16, vx: Math.sign(dxp) * 4.2 * ebMul(), vy: 0 }); beep(320, 0.07, "square", 0.04, 140); }
+      }
+    } else if (e.type === "brute") { /* CHARGING BRUTE: walks, winds up, charges like a bull with a wallet */
+      e.modeT++;
+      if (e.mode === "walk") {
+        if (adx > 200) e.x += Math.sign(dxp) * spd; else if (adx < 110) e.x -= Math.sign(dxp) * spd * 0.4;
+        if (e.modeT > 90 && adx < 430 && !P.dead) { e.mode = "wind"; e.modeT = 0; popup(e.x + 22, e.y - 18, "BRUTE IS CHARGING! 😤", "#ff5c5c", false, 80); }
+        if (e.fireCd-- <= 0 && adx < 380 && !P.dead) { e.fireCd = efire(160, 230); ebullets.push({ x: e.x + e.w / 2, y: e.y + 20, vx: Math.sign(dxp) * 4.4 * ebMul(), vy: 0 }); }
+      } else if (e.mode === "wind") {
+        if (e.modeT > 26) { e.mode = "charge"; e.modeT = 0; e.dir = Math.sign(dxp) || 1; SFX.roar(); }
+      } else if (e.mode === "charge") {
+        e.x += e.dir * 5.6;
+        if (stageTime % 4 === 0) burst(e.x + e.w / 2, GROUND - 3, 2, ["#cbb7ff"], 1.5, 14, 0.05);
+        if (e.modeT > 52) { e.mode = "walk"; e.modeT = 0; }
+      }
+    } else if (e.type === "bomber") { /* FLYING BOMBER: drifts overhead, drops arc bombs on Dili */
+      e.x -= e.speed * (dxp < 0 ? 0.4 : 1); e.y = e.baseY + Math.sin(e.t * 0.05) * 18;
+      if (e.x < cam - 60) { enemies.splice(ai, 1); continue; }
+      if (e.fireCd-- <= 0 && adx < 460 && !P.dead) { e.fireCd = efire(130, 200); ebullets.push({ x: e.x + 21, y: e.y + 22, vx: clamp(dxp / 60, -3, 3), vy: 1.5, arc: true }); noise(0.1, 0.08, 600); }
+    } else if (e.type === "dasher") { /* ZIG-ZAG SPRINTER: fast, bobs up and down, hard to track */
+      e.x += Math.sign(dxp) * spd * (adx > 90 ? 1 : -0.6);
+      e.y = GROUND - 46 + Math.sin(e.t * 0.3) * 7;
+      if (e.fireCd-- <= 0 && adx < 400 && !P.dead) { e.fireCd = efire(150, 220); ebullets.push({ x: e.x + e.w / 2, y: e.y + 16, vx: Math.sign(dxp) * 4.6 * ebMul(), vy: 0 }); }
+    } else if (e.type === "golden") { /* GOLDEN GOON: flees! Chase him down for 1000 */
+      e.x -= Math.sign(dxp) * spd;
+      if (e.x < cam - 70) { enemies.splice(ai, 1); popup(P.x + 15, P.y - 30, "The Golden Goon escaped! 😭", "#ffd23e"); continue; }
     } else if (e.type === "shield") {
       if (adx > 200) e.x += Math.sign(dxp) * spd;
       if (e.fireCd-- <= 0 && adx < 420 && !P.dead) { e.fireCd = efire(140, 210); ebullets.push({ x: e.x + e.w / 2, y: e.y + 18, vx: Math.sign(dxp) * 4.1 * ebMul(), vy: 0 }); }
@@ -1376,24 +1769,31 @@ function update() {
   /* ---- pickups ---- */
   for (var pi = pickups.length - 1; pi >= 0; pi--) {
     var pk = pickups[pi]; if (pk.x - cam < W + 140) pk.t++;
+    if (magnetT > 0 && !P.dead) { /* 🧲 COIN MAGNET: loot flies to Dili */
+      var mgx = (P.x + 15) - (pk.x + 13), mgy = (P.y + 24) - (pk.y + 13);
+      var mgd = Math.sqrt(mgx * mgx + mgy * mgy);
+      if (mgd < 300 && mgd > 4) { pk.x += mgx / mgd * 6.5; pk.y += mgy / mgd * 6.5; pk.vy = 0; pk.vx = 0; }
+    }
     pk.vy += 0.4; pk.x += pk.vx; pk.y += pk.vy;
     if (pk.y > GROUND - 26) { pk.y = GROUND - 26; pk.vy = 0; pk.vx = 0; }
     if (!P.dead && hit(pk, playerBox())) {
+      var coinMul = doubleT > 0 ? 2 : 1;
       if (pk.kind === "coin") {
-        dliCoins++; score += 150; SFX.coin();
-        popup(P.x + 15, P.y - 18, DLI_POPUPS[irnd(0, DLI_POPUPS.length - 1)] + " +150", "#ffd23e", false, 85);
+        dliCoins++; score += 150 * coinMul; SFX.coin();
+        popup(P.x + 15, P.y - 18, DLI_POPUPS[irnd(0, DLI_POPUPS.length - 1)] + " +" + (150 * coinMul) + (coinMul > 1 ? " (×2!)" : ""), "#ffd23e", false, 85);
         burst(pk.x + 13, pk.y + 13, 8, ["#ffd23e", "#fff3c4"], 2.4, 18, 0.05);
         pickups.splice(pi, 1); continue;
       }
       if (pk.kind === "btc") {
-        btcCoins++; score += 500; SFX.coin();
-        popup(P.x + 15, P.y - 18, BTC_POPUPS[irnd(0, BTC_POPUPS.length - 1)] + " +500", "#f7931a", false, 85);
+        btcCoins++; score += 500 * coinMul; SFX.coin();
+        /* the FIRST Bitcoin of the run always says it loud: "Bitcoin found!" — then the lines rotate */
+        popup(P.x + 15, P.y - 18, BTC_POPUPS[(btcCoins - 1) % BTC_POPUPS.length] + " +" + (500 * coinMul), "#f7931a", false, 85);
         burst(pk.x + 13, pk.y + 13, 10, ["#f7931a", "#ffd9a0"], 2.6, 20, 0.05);
         pickups.splice(pi, 1); continue;
       }
       if (pk.kind === "eth") {
-        ethCoins++; score += 300; SFX.coin();
-        popup(P.x + 15, P.y - 18, ETH_POPUPS[irnd(0, ETH_POPUPS.length - 1)] + " +300", "#8fb8ff", false, 85);
+        ethCoins++; score += 300 * coinMul; SFX.coin();
+        popup(P.x + 15, P.y - 18, ETH_POPUPS[irnd(0, ETH_POPUPS.length - 1)] + " +" + (300 * coinMul), "#8fb8ff", false, 85);
         burst(pk.x + 13, pk.y + 13, 10, ["#627eea", "#c9d6ff"], 2.6, 20, 0.05);
         pickups.splice(pi, 1); continue;
       }
@@ -1404,7 +1804,10 @@ function update() {
         burst(pk.x + 13, pk.y + 13, 10, ["#ff8a7a", "#ffffff"], 2.6, 20, 0.05);
         pickups.splice(pi, 1); continue;
       }
-      if (pk.kind === "medkit") { P.hp = Math.min(P.maxHp, P.hp + 2); popup(P.x + 15, P.y - 18, "+Health ❤", "#7dff8a"); }
+      if (pk.kind === "shield") { shieldT = 60 * 20; popup(P.x + 15, P.y - 18, "🛡️ SHIELD UP! One free block!", "#8fb8ff", false, 95); }
+      else if (pk.kind === "double") { doubleT = 60 * 15; popup(P.x + 15, P.y - 18, "×2 COINS! Everything pays double! 🪙🪙", "#ffd23e", false, 95); }
+      else if (pk.kind === "magnet") { magnetT = 60 * 15; popup(P.x + 15, P.y - 18, "🧲 COIN MAGNET! Loot flies to you!", "#ff8fb8", false, 95); }
+      else if (pk.kind === "medkit") { P.hp = Math.min(P.maxHp, P.hp + 2); popup(P.x + 15, P.y - 18, "+Health ❤", "#7dff8a"); }
       else if (pk.kind === "grenade") { P.grenades += 3; popup(P.x + 15, P.y - 18, "+3 Grenades 💣", "#ffd23e"); }
       else { P.weapon = pk.kind; P.weaponT = 60 * 18; popup(P.x + 15, P.y - 18, WEAPONS[pk.kind].label + "!", "#3ee6c4"); }
       SFX.pickup(); score += 50;
@@ -1456,6 +1859,8 @@ function bossAI() {
     if (bs.x <= arenaX) { bs.x = arenaX; bs.mode = "idle"; bs.modeT = 0; bs.atkCd = 80; }
   } else if (bs.kind === "gorilla") gorillaAI(bs, pcx, bcx);
   else if (bs.kind === "scorpion") scorpionAI(bs, pcx, bcx);
+  else if (bs.kind === "golem") golemAI(bs, pcx, bcx);
+  else if (bs.kind === "moon") moonAI(bs, pcx, bcx);
   else tankAI(bs, pcx, bcx);
   if (!P.dead && P.inv <= 0 && hit(bs, playerBox())) hurtPlayer(1);
 }
@@ -1466,7 +1871,7 @@ function gorillaAI(bs, pcx, bcx) {
     bs.x += clamp(pcx - bcx, -1, 1) * 0.65;               /* lumber toward Dili */
     bs.x = clamp(bs.x, minX, maxX);
     if (bs.fireCd-- <= 0 && !P.dead) {                     /* rock throw */
-      bs.fireCd = irnd(170, 260);
+      bs.fireCd = irnd(205, 295);
       ebullets.push({ x: bs.x + 20, y: bs.y + 30, vx: clamp((pcx - bs.x) / 55, -5.4, 5.4), vy: -8.6, arc: true, rock: true });
       SFX.big();
     }
@@ -1521,7 +1926,7 @@ function scorpionAI(bs, pcx, bcx) {
       bs.shots++;
       var sx = bs.x + 6, sy = bs.y - 26;
       var ang = Math.atan2((P.y + 22) - sy, pcx - sx);
-      ebullets.push({ x: sx, y: sy, vx: Math.cos(ang) * 6.6, vy: Math.sin(ang) * 6.6, sting: true });
+      ebullets.push({ x: sx, y: sy, vx: Math.cos(ang) * 5.8, vy: Math.sin(ang) * 5.8, sting: true });
       SFX.big();
     }
     if (bs.shots >= want && bs.modeT > want * 9 + 14) { bs.mode = "idle"; bs.modeT = 0; bs.atkCd = bs.phase === 2 ? irnd(85, 120) : irnd(130, 180); }
@@ -1537,16 +1942,78 @@ function scorpionAI(bs, pcx, bcx) {
     if (bs.shots >= 3 && bs.modeT > 48) { bs.mode = "idle"; bs.modeT = 0; bs.atkCd = bs.phase === 2 ? irnd(85, 120) : irnd(130, 180); }
   }
 }
+function golemAI(bs, pcx, bcx) { /* FROSTBITE: slow ice golem — shard spreads + freezing slam */
+  var st = STAGES[stageIdx], groundY = GROUND - bs.h;
+  var minX = st.len - W + 26, maxX = st.len - bs.w - 26;
+  if (bs.mode === "idle") {
+    bs.x += clamp(pcx - bcx, -1, 1) * (bs.phase === 2 ? 0.85 : 0.55);
+    bs.x = clamp(bs.x, minX, maxX);
+    if (bs.fireCd-- <= 0 && !P.dead) { /* ice shard fan */
+      bs.fireCd = bs.phase === 2 ? irnd(120, 170) : irnd(165, 230);
+      for (var si2 = -1; si2 <= 1; si2++) {
+        var ang2 = Math.atan2((P.y + 20) - (bs.y + 44), pcx - bcx) + si2 * 0.24;
+        ebullets.push({ x: bcx, y: bs.y + 44, vx: Math.cos(ang2) * 5.2, vy: Math.sin(ang2) * 5.2, sting: true });
+      }
+      noise(0.12, 0.12, 2400);
+    }
+    if (bs.atkCd-- <= 0 && !P.dead) { bs.mode = "slamWind"; bs.modeT = 0; }
+  } else if (bs.mode === "slamWind") {
+    if (bs.modeT > 24) { bs.mode = "slamAir"; bs.modeT = 0; bs.vy = -10.8; bs.slamLanded = false; }
+  } else if (bs.mode === "slamAir") {
+    bs.vy += 0.7; bs.y += bs.vy; bs.x += clamp(pcx - bcx, -1.4, 1.4);
+    if (bs.y >= groundY && !bs.slamLanded) {
+      bs.y = groundY; bs.slamLanded = true; bs.mode = "tired"; bs.modeT = 0;
+      addShake(12); SFX.boom();
+      burst(bs.x + bs.w / 2, GROUND - 4, 20, ["#bfe6ff", "#ffffff"], 4, 26, 0.1);
+      ebullets.push({ x: bs.x - 14, y: GROUND - 10, vx: -3.6, vy: 0, wave: true });
+      ebullets.push({ x: bs.x + bs.w + 4, y: GROUND - 10, vx: 3.6, vy: 0, wave: true });
+      if (bs.phase === 2) for (var fi2 = 0; fi2 < 3; fi2++) ebullets.push({ x: bs.x + rnd(10, bs.w - 10), y: bs.y - 30, vx: rnd(-1, 1), vy: rnd(2, 4), sting: true });
+    }
+  } else if (bs.mode === "tired") {
+    if (bs.modeT > (bs.phase === 2 ? 30 : 46)) { bs.mode = "idle"; bs.modeT = 0; bs.atkCd = bs.phase === 2 ? irnd(85, 125) : irnd(130, 180); }
+  }
+}
+function moonAI(bs, pcx, bcx) { /* CAPTAIN MOONBAGS: hovering sky-captain — spread fire, bomber drops, gravity dives */
+  var st = STAGES[stageIdx];
+  var homeX = st.len - bs.w - 110;
+  bs.baseY = GROUND - bs.h - 14; /* hovers low enough for Dili's fire to reach — drama, not a stalemate */
+  if (bs.mode === "idle" || bs.mode === "enter") {
+    bs.x = homeX + Math.sin(bs.t * 0.017) * 92;
+    bs.y = bs.baseY + Math.sin(bs.t * 0.045) * 20;
+    if (bs.fireCd-- <= 0 && !P.dead) { /* triple moon-shot spread */
+      bs.fireCd = bs.phase === 2 ? irnd(80, 115) : irnd(120, 165);
+      for (var mi = -1; mi <= 1; mi++) {
+        var ang3 = Math.atan2((P.y + 20) - (bs.y + 60), pcx - (bs.x + 30)) + mi * 0.19;
+        ebullets.push({ x: bs.x + 30, y: bs.y + 60, vx: Math.cos(ang3) * 5.6, vy: Math.sin(ang3) * 5.6 });
+      }
+      SFX.big();
+    }
+    if (bs.atkCd-- <= 0 && !P.dead) { bs.modeT = 0; bs.mode = (bs.t % 3 === 0) ? "diveWind" : "dropWind"; }
+  } else if (bs.mode === "dropWind") {
+    if (bs.modeT > 18) { /* bomber drop */
+      bs.mode = "idle"; bs.modeT = 0; bs.atkCd = bs.phase === 2 ? irnd(150, 210) : irnd(220, 300);
+      if (enemies.length < 3) { spawnEnemy("bomber", bs.x + 40); popup(bs.x + 60, bs.y - 16, "Bomber away! 💣", "#ff8a7a"); }
+    }
+  } else if (bs.mode === "diveWind") {
+    if (bs.modeT > 20) { bs.mode = "dive"; bs.modeT = 0; bs.diveFrom = bs.y; SFX.roar(); }
+  } else if (bs.mode === "dive") { /* gravity dive at Dili, then climbs back */
+    bs.y += 6.4; bs.x += clamp(pcx - bcx, -2.6, 2.6);
+    if (bs.y >= GROUND - bs.h - 6 || bs.modeT > 46) { bs.mode = "climb"; bs.modeT = 0; addShake(7); burst(bs.x + bs.w / 2, GROUND - 4, 14, ["#cbb7ff"], 3.4, 22, 0.08); }
+  } else if (bs.mode === "climb") {
+    bs.y -= 4.6;
+    if (bs.y <= bs.baseY) { bs.y = bs.baseY; bs.mode = "idle"; bs.modeT = 0; bs.atkCd = bs.phase === 2 ? irnd(90, 140) : irnd(140, 200); }
+  }
+}
 function tankAI(bs, pcx, bcx) {
   var st = STAGES[stageIdx];
   var arenaX = st.len - bs.w - 90;
   bs.x = arenaX + Math.sin(bs.t * 0.008) * 26;
   if (bs.fireCd-- <= 0 && !P.dead) {
-    bs.fireCd = bs.phase === 2 ? irnd(52, 80) : irnd(90, 125);
+    bs.fireCd = bs.phase === 2 ? irnd(78, 108) : irnd(118, 155);
     var bang = Math.atan2((P.y + 20) - (bs.y + 34), pcx - (bs.x + 26));
-    ebullets.push({ x: bs.x + 26, y: bs.y + 34, vx: Math.cos(bang) * 5.4, vy: Math.sin(bang) * 5.4 });
-    ebullets.push({ x: bs.x + 130, y: bs.y + 8, vx: -3.2, vy: 1.4 });
-    if (bs.phase === 2) ebullets.push({ x: bs.x + 26, y: bs.y + 34, vx: Math.cos(bang + 0.22) * 5.4, vy: Math.sin(bang + 0.22) * 5.4 });
+    ebullets.push({ x: bs.x + 26, y: bs.y + 34, vx: Math.cos(bang) * 4.9, vy: Math.sin(bang) * 4.9 });
+    ebullets.push({ x: bs.x + 130, y: bs.y + 8, vx: -3.0, vy: 1.3 });
+    if (bs.phase === 2) ebullets.push({ x: bs.x + 26, y: bs.y + 34, vx: Math.cos(bang + 0.22) * 4.9, vy: Math.sin(bang + 0.22) * 4.9 });
     SFX.big();
   }
   if (bs.spawnCd-- <= 0 && enemies.length < 3) { bs.spawnCd = irnd(360, 540); spawnEnemy("grunt", bs.x - 70); popup(bs.x - 40, GROUND - 90, "Backup incoming!", "#ff8a7a"); }
@@ -1605,6 +2072,15 @@ function drawBackground(st) {
     } else if (st.name === "desert") { /* flat-top mesas */
       R(mx + 30, GROUND - 84, 130, 84, st.hill2); R(mx + 44, GROUND - 98, 102, 16, st.hill2);
       R(mx + 220, GROUND - 58, 84, 58, st.hill2);
+    } else if (st.name === "mine") { /* giant ice crystals + frozen rigs */
+      ctx.fillStyle = st.hill2;
+      ctx.beginPath(); ctx.moveTo(mx + 40, GROUND); ctx.lineTo(mx + 66, GROUND - 130); ctx.lineTo(mx + 92, GROUND); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(mx + 120, GROUND); ctx.lineTo(mx + 138, GROUND - 84); ctx.lineTo(mx + 156, GROUND); ctx.closePath(); ctx.fill();
+      R(mx + 210, GROUND - 44, 62, 44, st.hill2); R(mx + 222, GROUND - 56, 38, 12, st.hill2);
+    } else if (st.name === "sky") { /* floating islands with waterfalls of light */
+      R(mx + 30, GROUND - 210, 120, 20, st.hill2); R(mx + 60, GROUND - 190, 60, 10, st.hill2);
+      R(mx + 220, GROUND - 160, 84, 16, st.hill2); R(mx + 244, GROUND - 144, 36, 8, st.hill2);
+      ctx.fillStyle = "rgba(160,200,255,.35)"; ctx.fillRect(mx + 84, GROUND - 190, 5, 120); ctx.fillRect(mx + 258, GROUND - 144, 4, 84);
     } else { /* harbor crane + mast */
       R(mx + 60, GROUND - 168, 10, 168, st.hill2); R(mx + 60, GROUND - 168, 130, 9, st.hill2); R(mx + 176, GROUND - 140, 4, 30, st.hill2);
       R(mx + 230, GROUND - 104, 8, 104, st.hill2); R(mx + 206, GROUND - 104, 56, 7, st.hill2);
@@ -1617,6 +2093,8 @@ function drawBackground(st) {
   for (var bx = off - 240; bx < W + 240; bx += 240) {
     if (st.name === "jungle") { R(bx + 30, GROUND - 150, 16, 150, st.hill2); R(bx + 8, GROUND - 168, 60, 26, st.hill2); R(bx + 130, GROUND - 105, 12, 105, st.hill2); R(bx + 112, GROUND - 122, 48, 22, st.hill2); }
     else if (st.name === "desert") { R(bx + 40, GROUND - 90, 90, 90, st.hill2); R(bx + 62, GROUND - 118, 46, 30, st.hill2); R(bx + 170, GROUND - 64, 10, 64, st.hill2); R(bx + 158, GROUND - 74, 34, 14, st.hill2); }
+    else if (st.name === "mine") { R(bx + 30, GROUND - 110, 20, 110, st.hill2); R(bx + 22, GROUND - 122, 36, 14, st.hill2); R(bx + 140, GROUND - 70, 60, 70, st.hill2); R(bx + 152, GROUND - 84, 36, 16, st.hill2); }
+    else if (st.name === "sky") { R(bx + 26, GROUND - 96, 66, 14, st.hill2); R(bx + 44, GROUND - 82, 30, 8, st.hill2); R(bx + 150, GROUND - 130, 54, 12, st.hill2); R(bx + 164, GROUND - 118, 26, 8, st.hill2); }
     else { R(bx + 20, GROUND - 130, 54, 130, st.hill2); R(bx + 34, GROUND - 152, 26, 24, st.hill2); R(bx + 130, GROUND - 84, 70, 84, st.hill2); R(bx + 196, GROUND - 108, 8, 108, st.hill2); }
   }
   /* DLICOM billboards along the stage — logo boards alternate with crypto slogans.
@@ -1653,6 +2131,10 @@ function drawBackground(st) {
       ctx.beginPath(); ctx.arc(fx2 - 38, GROUND - 278, 44, 0, 7); ctx.fill();
     } else if (st.name === "desert") { /* rock spire */
       ctx.beginPath(); ctx.moveTo(fx2, GROUND); ctx.lineTo(fx2 + 26, GROUND - 190); ctx.lineTo(fx2 + 52, GROUND); ctx.closePath(); ctx.fill();
+    } else if (st.name === "mine") { /* icicle overhang */
+      ctx.beginPath(); ctx.moveTo(fx2, GROUND - 320); ctx.lineTo(fx2 + 60, GROUND - 320); ctx.lineTo(fx2 + 30, GROUND - 210); ctx.closePath(); ctx.fill();
+    } else if (st.name === "sky") { /* drifting cloud bank */
+      ctx.beginPath(); ctx.arc(fx2 + 20, GROUND - 250, 42, 0, 7); ctx.fill(); ctx.beginPath(); ctx.arc(fx2 + 66, GROUND - 236, 30, 0, 7); ctx.fill();
     } else { /* harbor piling + rope */
       R(fx2, GROUND - 210, 18, 210, "rgba(6,8,20,.34)");
       R(fx2 + 18, GROUND - 196, 60, 6, "rgba(6,8,20,.3)");
@@ -1673,7 +2155,7 @@ function drawDili() {
   var x = P.x - cam, y = P.y, f = P.face;
   ctx.save(); ctx.translate(Math.round(x + 15), Math.round(y)); ctx.scale(f, 1); ctx.translate(-15, 0);
   /* crouch: the whole sprite squashes down — head drops below enemy fire lines */
-  if (P.crouch) { ctx.translate(0, 52); ctx.scale(1, 0.6); ctx.translate(0, -52); }
+  if (P.crouch) { ctx.translate(0, 52); ctx.scale(1, 0.52); ctx.translate(0, -52); } /* deep, unmistakable squash */
   var run = P.onGround && P.vx !== 0, ph = run ? Math.sin(P.runT * 6) : 0;
   var legA = run ? ph * 6 : 0, legB = run ? -ph * 6 : 0;
   var bob = (run ? Math.abs(Math.sin(P.runT * 6)) * 2 : Math.sin(stageTime * 0.08) * 1);
@@ -1764,8 +2246,37 @@ function drawEnemy(e) {
     R(x + 16, y + 4, 8, 9, "#ff5c5c"); if (Math.floor(stageTime / 20) % 2) R(x + 18, y + 6, 4, 4, "#ffd23e");
     return;
   }
+  if (e.type === "bomber") { /* flying bomber: balloon rig + bomb bay */
+    R(x + 6, y + 8, 30, 14, fl ? "#fff" : "#8a4a6e");
+    ctx.fillStyle = fl ? "#fff" : "#e2547e"; ctx.beginPath(); ctx.ellipse(x + 21, y + 2, 16, 8, 0, 0, 7); ctx.fill();
+    R(x + 18, y + 14, 6, 8, "#2b2f3a");
+    R(x + 16, y + 20, 10, 6, "#ffd23e"); /* the next bomb, wobbling */
+    var rp2 = Math.floor(stageTime / 2) % 2;
+    R(x - 2, y + 12, 6, 3, rp2 ? "#cfd6ff" : "#8a93c9"); R(x + 38, y + 12, 6, 3, rp2 ? "#8a93c9" : "#cfd6ff");
+    if (e.hp < e.maxHp) { R(x, y - 9, e.w, 4, "rgba(0,0,0,.45)"); R(x, y - 9, e.w * clamp(e.hp / e.maxHp, 0, 1), 4, "#7dff8a"); }
+    return;
+  }
+  if (e.type === "brute") { /* hulking charger with a tiny helmet and big opinions */
+    var windup = e.mode === "wind", charging = e.mode === "charge";
+    R(x + 8, y + 40, 11, 15, "#2b2f3a"); R(x + 6, y + 53, 15, 6, "#1c1c26");
+    R(x + 26, y + 40, 11, 15, "#2b2f3a"); R(x + 24, y + 53, 15, 6, "#1c1c26");
+    R(x + 3, y + 16, 38, 27, fl ? "#fff" : (windup ? "#a83232" : "#7a2b4a"));
+    R(x + 3, y + 16, 38, 6, fl ? "#fff" : "#5c1f36");
+    R(x + 8, y + 2, 28, 15, fl ? "#fff" : "#d9a066");
+    R(x + 6, y - 2, 32, 7, "#c9862b"); /* tiny helmet, huge confidence */
+    R(x + 11, y + 9, 22, 4, "#14141f");
+    ctx.fillStyle = "#ff5c5c"; ctx.fillRect(x + 14, y + 6, 4, 4); ctx.fillRect(x + 26, y + 6, 4, 4);
+    if (windup) { ctx.fillStyle = "#ff5c5c"; ctx.font = "900 22px 'Bungee',sans-serif"; ctx.textAlign = "center"; ctx.fillText("!", x + 22, y - 10); }
+    if (e.hp < e.maxHp) { R(x, y - 10, e.w, 4, "rgba(0,0,0,.45)"); R(x, y - 10, e.w * clamp(e.hp / e.maxHp, 0, 1), 4, "#7dff8a"); }
+    return;
+  }
   /* humanoid goons */
-  var body = e.type === "shield" ? "#7a4a2b" : e.type === "grenadier" ? "#5c6e3a" : "#6e3b8a";
+  var body = e.type === "golden" ? "#d99a16" : e.type === "shield" ? "#7a4a2b" : e.type === "grenadier" ? "#5c6e3a" : e.type === "dasher" ? "#2b6e8a" : "#6e3b8a";
+  if (e.type === "golden") { /* he sparkles. He knows it. */
+    ctx.fillStyle = "rgba(255,210,62,.35)"; ctx.beginPath(); ctx.arc(x + 15, y + 22, 30, 0, 7); ctx.fill();
+    ctx.fillStyle = "#fff3c4"; ctx.font = "13px sans-serif"; ctx.textAlign = "center";
+    ctx.fillText("✦", x + 2 + Math.sin(e.t * 0.2) * 3, y + 6); ctx.fillText("✦", x + 28, y + 30 + Math.cos(e.t * 0.17) * 3);
+  }
   var legPh = Math.sin(e.t * 0.22) * 4;
   R(x + 7, y + 30, 6, 12, "#2b2f3a"); R(x + 7 + legPh, y + 40, 8, 5, "#1c1c26");
   R(x + 18, y + 30, 6, 12, "#2b2f3a"); R(x + 18 - legPh, y + 40, 8, 5, "#1c1c26");
@@ -1773,7 +2284,13 @@ function drawEnemy(e) {
   R(x + 6, y + 2, 18, 13, fl ? "#fff" : "#d9a066");        /* head */
   R(x + 5, y + 0, 20, 6, e.type === "grenadier" ? "#3a4a22" : "#3a2b55"); /* cap */
   R(x + 8, y + 8, 13, 3, "#14141f");                        /* visor */
-  if (e.type === "grenadier") { R(x + 22, y + 10, 8, 10, "#42532c"); R(x + 24, y + 6, 5, 5, "#7dff8a"); }
+  if (e.surrender) { /* white flag, waving bravely */
+    var wv = Math.sin(e.t * 0.25) * 3;
+    R(x + 24, y - 14, 2.5, 26, "#e8ecff");
+    ctx.fillStyle = "#ffffff"; ctx.beginPath(); ctx.moveTo(x + 26.5, y - 14); ctx.lineTo(x + 40 + wv, y - 10); ctx.lineTo(x + 26.5, y - 5); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = "#14141f"; ctx.font = "10px sans-serif"; ctx.textAlign = "center"; ctx.fillText("😭", x + 15, y - 2);
+  }
+  else if (e.type === "grenadier") { R(x + 22, y + 10, 8, 10, "#42532c"); R(x + 24, y + 6, 5, 5, "#7dff8a"); }
   else R(x + (P.x > e.x ? 20 : -8), y + 18, 16, 5, "#2b2f3a"); /* gun */
   if (e.type === "shield") {
     R(x + (P.x > e.x ? 26 : -6), y + 10, 8, 30, fl ? "#fff" : "#9fb6d9");
@@ -1824,7 +2341,64 @@ function drawBoss() {
   if (!boss) return;
   if (boss.kind === "gorilla") drawGorilla(boss);
   else if (boss.kind === "scorpion") drawScorpion(boss);
+  else if (boss.kind === "golem") drawGolem(boss);
+  else if (boss.kind === "moon") drawMoon(boss);
   else drawTank(boss);
+}
+/* STAGE 4 — Frostbite: an ice golem guarding the frozen mine, mittens and all */
+function drawGolem(b) {
+  var x = b.x - cam, y = b.y, fl = b.flash > 0;
+  var ice = fl ? "#ffffff" : "#9fd4f5", dark = fl ? "#ffffff" : "#5b93c4", lite = fl ? "#ffffff" : "#e8f7ff";
+  var wind = b.mode === "slamWind";
+  R(x + 24, y + 104, 30, 22, dark); R(x + 18, y + 122, 42, 10, "#33507a");
+  R(x + 96, y + 104, 30, 22, dark); R(x + 90, y + 122, 42, 10, "#33507a");
+  var armRaise = wind ? -46 : 0;
+  R(x - 10, y + 40 + armRaise, 28, 58, dark); R(x - 14, y + 90 + armRaise, 36, 22, "#e2547e"); /* left MITTEN */
+  R(x + b.w - 18, y + 40 + armRaise, 28, 58, dark); R(x + b.w - 22, y + 90 + armRaise, 36, 22, "#e2547e"); /* right MITTEN */
+  R(x + 16, y + 30, b.w - 32, 80, ice);
+  R(x + 16, y + 30, b.w - 32, 12, lite);
+  /* the frozen ETH block in his chest */
+  ctx.fillStyle = "#627eea"; ctx.beginPath(); ctx.moveTo(x + b.w / 2, y + 52); ctx.lineTo(x + b.w / 2 + 13, y + 70); ctx.lineTo(x + b.w / 2, y + 78); ctx.lineTo(x + b.w / 2 - 13, y + 70); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = "rgba(255,255,255,.75)"; ctx.lineWidth = 2; ctx.strokeRect(x + b.w / 2 - 17, y + 48, 34, 38);
+  /* craggy ice head with icicle crown */
+  R(x + 42, y + 2, b.w - 84, 32, ice);
+  ctx.fillStyle = lite;
+  for (var ii = 0; ii < 4; ii++) { ctx.beginPath(); ctx.moveTo(x + 48 + ii * 17, y + 2); ctx.lineTo(x + 54 + ii * 17, y - 14); ctx.lineTo(x + 62 + ii * 17, y + 2); ctx.closePath(); ctx.fill(); }
+  ctx.fillStyle = "#274b73"; ctx.fillRect(x + 56, y + 14, 7, 7); ctx.fillRect(x + b.w - 63, y + 14, 7, 7);
+  R(x + 58, y + 26, b.w - 116, 5, "#33507a");
+  if (b.mode === "tired") { ctx.fillStyle = "#fff"; ctx.font = "900 14px 'Nunito',sans-serif"; ctx.textAlign = "center"; for (var si3 = 0; si3 < 3; si3++) ctx.fillText("❄", x + 34 + si3 * 40, y - 20 + Math.sin(b.t * 0.2 + si3) * 4); }
+  if (wind) { ctx.fillStyle = "rgba(120,200,255,.9)"; ctx.font = "900 26px 'Bungee',sans-serif"; ctx.textAlign = "center"; ctx.fillText("!", x + b.w / 2, y - 26); }
+  bossBar(b, x, y);
+}
+/* STAGE 5 — Captain Moonbags: a hovering sky-captain in a moon-copter */
+function drawMoon(b) {
+  var x = b.x - cam, y = b.y, fl = b.flash > 0;
+  var hull = fl ? "#ffffff" : "#4a3a8a", dark = fl ? "#ffffff" : "#2c2160", lite = fl ? "#ffffff" : "#8a76ff";
+  /* rotor */
+  var rp3 = Math.floor(stageTime / 2) % 2;
+  R(x + 20, y - 12, b.w - 40, 5, rp3 ? "#cfd6ff" : "#8a93c9");
+  R(x + b.w / 2 - 3, y - 8, 6, 12, dark);
+  /* crescent moon crest */
+  ctx.fillStyle = "#ffd23e"; ctx.beginPath(); ctx.arc(x + b.w - 34, y + 16, 13, 0, 7); ctx.fill();
+  ctx.fillStyle = hull; ctx.beginPath(); ctx.arc(x + b.w - 27, y + 12, 11, 0, 7); ctx.fill();
+  /* hull + glass dome with the Captain inside */
+  R(x + 8, y + 22, b.w - 16, 46, hull);
+  R(x + 8, y + 22, b.w - 16, 9, lite);
+  ctx.fillStyle = "rgba(190,230,255,.5)"; ctx.beginPath(); ctx.arc(x + 52, y + 42, 19, Math.PI, 0); ctx.fill();
+  R(x + 44, y + 30, 16, 13, "#e8b98a"); /* captain head */
+  R(x + 42, y + 26, 20, 6, "#ffd23e");   /* captain cap */
+  ctx.fillStyle = "#14141f"; ctx.fillRect(x + 48, y + 35, 3, 3); ctx.fillRect(x + 55, y + 35, 3, 3);
+  /* cannons + thrusters */
+  R(x - 4, y + 52, 30, 9, "#2b2f3a"); R(x + b.w - 40, y + 56, 30, 8, "#2b2f3a");
+  ctx.fillStyle = (stageTime % 6 < 3) ? "#ffb35c" : "#ff7b3e";
+  ctx.beginPath(); ctx.moveTo(x + 30, y + 68); ctx.lineTo(x + 38, y + 68); ctx.lineTo(x + 34, y + 82 + (stageTime % 5)); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(x + b.w - 46, y + 68); ctx.lineTo(x + b.w - 38, y + 68); ctx.lineTo(x + b.w - 42, y + 82 + (stageTime % 5)); ctx.closePath(); ctx.fill();
+  /* coin sacks hanging below — the stash, visible and smug */
+  R(x + 66, y + 68, 22, 18, "#c9862b"); R(x + 100, y + 68, 22, 18, "#c9862b");
+  ctx.fillStyle = "#7a4d00"; ctx.font = "900 12px 'Nunito',sans-serif"; ctx.textAlign = "center";
+  ctx.fillText("Ð", x + 77, y + 81); ctx.fillText("B", x + 111, y + 81);
+  if (b.mode === "diveWind" || b.mode === "dropWind") { ctx.fillStyle = "#ff5c5c"; ctx.font = "900 26px 'Bungee',sans-serif"; ctx.textAlign = "center"; ctx.fillText("!", x + b.w / 2, y - 24); }
+  bossBar(b, x, y - 16);
 }
 /* STAGE 1 — Jungle Juggernaut: a hulking robo-gorilla that charges and ground-slams */
 function drawGorilla(b) {
@@ -2010,6 +2584,20 @@ function drawPickup(pk) {
     ctx.restore();
     return;
   }
+  if (pk.kind === "shield" || pk.kind === "double" || pk.kind === "magnet") { /* power-up orbs with clear names */
+    var pc2 = { shield: "#8fb8ff", double: "#ffd23e", magnet: "#ff8fb8" }[pk.kind];
+    ctx.save(); ctx.translate(x + 13, y + 13); ctx.scale(1 + Math.sin(pk.t * 0.15) * 0.09, 1 + Math.sin(pk.t * 0.15) * 0.09);
+    ctx.fillStyle = "rgba(255,255,255,.25)"; ctx.beginPath(); ctx.arc(0, 0, 17, 0, 7); ctx.fill();
+    ctx.fillStyle = pc2; ctx.beginPath(); ctx.arc(0, 0, 13, 0, 7); ctx.fill();
+    ctx.fillStyle = "#14141f"; ctx.font = "15px sans-serif"; ctx.textAlign = "center";
+    ctx.fillText({ shield: "🛡", double: "×2", magnet: "🧲" }[pk.kind], 0, 5.5);
+    ctx.restore();
+    ctx.fillStyle = "#ffffff"; ctx.font = "900 9.5px 'Nunito',sans-serif"; ctx.textAlign = "center";
+    ctx.strokeStyle = "rgba(0,0,0,.6)"; ctx.lineWidth = 3;
+    var plbl = { shield: "SHIELD", double: "×2 COINS", magnet: "MAGNET" }[pk.kind];
+    ctx.strokeText(plbl, x + 13, y - 4); ctx.fillText(plbl, x + 13, y - 4);
+    return;
+  }
   var colors = { mg: "#ffb35c", spread: "#3ee6c4", rocket: "#7dff8a", medkit: "#ff8a7a", grenade: "#ffd23e" };
   R(x - 2, y - 2, 30, 30, "rgba(0,0,0,.35)");
   R(x, y, 26, 26, colors[pk.kind]);
@@ -2056,6 +2644,28 @@ function drawHUD() {
   ctx.fillStyle = "#ff8a7a"; ctx.textAlign = "right";
   ctx.fillText("❤ Lives × " + P.lives, 244, 105);
   ctx.textAlign = "left";
+  /* ---- BIG combo + active power-ups, impossible to miss ---- */
+  if (m >= 2) {
+    var pulse2 = 1 + Math.sin(stageTime * 0.22) * 0.09;
+    ctx.save(); ctx.translate(W / 2, 128 + fsOff); ctx.scale(pulse2, pulse2);
+    ctx.font = "400 30px 'Bungee','Trebuchet MS',sans-serif"; ctx.textAlign = "center";
+    ctx.strokeStyle = "rgba(0,0,0,.65)"; ctx.lineWidth = 6;
+    var cTxt = "COMBO ×" + m + " 🔥";
+    ctx.strokeText(cTxt, 0, 0); ctx.fillStyle = m >= 5 ? "#ff5c5c" : m === 3 ? "#ff9d2e" : "#ffd23e"; ctx.fillText(cTxt, 0, 0);
+    ctx.restore();
+  }
+  var puParts = [];
+  if (shieldT > 0) puParts.push("🛡️ Shield " + Math.ceil(shieldT / 60) + "s");
+  if (doubleT > 0) puParts.push("×2 Coins " + Math.ceil(doubleT / 60) + "s");
+  if (magnetT > 0) puParts.push("🧲 Magnet " + Math.ceil(magnetT / 60) + "s");
+  if (endless) puParts.push("♾️ Endless Lv " + endlessLevel);
+  if (puParts.length) {
+    ctx.font = "900 13.5px 'Nunito','Trebuchet MS',sans-serif"; ctx.textAlign = "center";
+    ctx.fillStyle = "#8fb8ff"; ctx.strokeStyle = "rgba(0,0,0,.6)"; ctx.lineWidth = 4;
+    var puTxt = puParts.join("   ·   ");
+    ctx.strokeText(puTxt, W / 2, 152 + fsOff); ctx.fillText(puTxt, W / 2, 152 + fsOff);
+    ctx.textAlign = "left";
+  }
   /* ---- right panel: weapon, grenades, stage ---- */
   var narrow = W < 700;
   panel(W - 246, 8 + fsOff, 238, 66);
@@ -2067,14 +2677,14 @@ function drawHUD() {
   ctx.fillText(STAGE_INTROS[stageIdx], W - 16, 70 + fsOff);
   /* ---- progress: distance OR wave progress, labelled with % and the boss ahead ---- */
   var st = STAGES[stageIdx];
-  var prog = bossMode ? 1 : Math.max(clamp(P.x / st.len, 0, 1), (spawnPtr / SPAWNS[stageIdx].length) * 0.94);
+  var prog = bossMode ? 1 : clamp(P.x / st.len, 0, 1); /* DISTANCE ONLY — the bar never moves while Dili stands still */
   var pgY = 8 + fsOff + (narrow ? 126 : 0), pgW = narrow ? 300 : 316, pgX = W / 2 - pgW / 2;
   panel(pgX, pgY, pgW, 40);
   R(pgX + 8, pgY + 8, pgW - 16, 8, "rgba(255,255,255,.16)");
   R(pgX + 8, pgY + 8, (pgW - 16) * prog, 8, "#3ee6c4");
   R(pgX + 8 + (pgW - 16) * prog - 4, pgY + 5, 9, 14, "#ffd23e");
   ctx.fillStyle = "#e6ebff"; ctx.font = "800 11.5px 'Nunito','Trebuchet MS',sans-serif"; ctx.textAlign = "center";
-  ctx.fillText(Math.round(prog * 100) + "%  ·  Boss ahead: " + BOSS_DEFS[stageIdx].name, W / 2, pgY + 32);
+  ctx.fillText(endless ? "♾️ ENDLESS — Level " + endlessLevel + " · Best " + hiScore : Math.round(prog * 100) + "%  ·  Boss ahead: " + BOSS_DEFS[stageIdx].name, W / 2, pgY + 32);
 }
 
 function render() {
@@ -2083,6 +2693,17 @@ function render() {
   if (shake > 0.4) ctx.translate(rnd(-shake, shake) * 0.5, rnd(-shake, shake) * 0.5);
   drawBackground(st);
   for (var i = 0; i < cages.length; i++) drawCage(cages[i]);
+  for (var cri2 = 0; cri2 < crates.length; cri2++) { /* smashable loot crate */
+    var cr2 = crates[cri2], crx2 = cr2.x - cam;
+    if (crx2 > -50 && crx2 < W + 50) {
+      R(crx2, cr2.y, 34, 34, cr2.flash > 0 ? "#ffffff" : "#a8742f");
+      R(crx2, cr2.y + 14, 34, 6, "#8a5a2b"); R(crx2 + 14, cr2.y, 6, 34, "#8a5a2b");
+      R(crx2 + 3, cr2.y + 3, 28, 28, "rgba(0,0,0,0)");
+      ctx.strokeStyle = "#6e451a"; ctx.lineWidth = 2.5; ctx.strokeRect(crx2 + 1, cr2.y + 1, 32, 32);
+      ctx.fillStyle = "#ffd23e"; ctx.font = "900 13px 'Nunito',sans-serif"; ctx.textAlign = "center"; ctx.fillText("?", crx2 + 17, cr2.y + 22);
+      if (cr2.flash > 0) cr2.flash--;
+    }
+  }
   for (var j = 0; j < pickups.length; j++) drawPickup(pickups[j]);
   for (var k = 0; k < enemies.length; k++) drawEnemy(enemies[k]);
   drawBoss();
@@ -2132,6 +2753,11 @@ function render() {
   /* shells */
   for (var si = 0; si < shellsFx.length; si++) { var sh = shellsFx[si]; ctx.save(); ctx.translate(sh.x - cam, sh.y); ctx.rotate(sh.rot); R(-3, -1, 6, 3, "#ffd23e"); ctx.restore(); }
   if (P && state !== "title" && state !== "stageclear") drawDili();
+  if (P && shieldT > 0 && state === "play" && !P.dead) { /* shield power-up bubble */
+    ctx.strokeStyle = "rgba(143,184,255," + (0.55 + 0.3 * Math.sin(stageTime * 0.15)) + ")"; ctx.lineWidth = 3;
+    ctx.fillStyle = "rgba(143,184,255,.12)";
+    ctx.beginPath(); ctx.arc(P.x - cam + 15, P.y + 24, 40, 0, 7); ctx.fill(); ctx.stroke();
+  }
   /* particles */
   for (var pi = 0; pi < parts.length; pi++) {
     var pt = parts[pi];
@@ -2199,7 +2825,7 @@ function frame(ts) {
     if (slowMo > 0) { slowMo--; if (slowMo % 3 !== 0) continue; }
     if (state === "stageclear") {
       clearTimer++;
-      if (clearTimer > 150) { showStory(stageIdx); }
+      if (clearTimer > 150) { if (endless) { state = "play"; bossMode = false; popup(W / 2, 140, "Boss down! Endless rolls on… ♾️", "#3ee6c4", true); } else startCutscene(stageIdx); }
     }
     update();
   }
@@ -2213,6 +2839,7 @@ try { muted = localStorage.getItem("diliStreakMuted") === "1"; } catch (e) {}
 syncMuteBtn(); syncTitleBest();
 document.getElementById("startBtn").addEventListener("click", function () {
   audio(); startMusic(); playJingle();
+  endless = false;
   document.getElementById("titleScreen").classList.add("hidden");
   document.getElementById("endScreen").classList.add("hidden");
   resetRun();
@@ -2221,16 +2848,31 @@ document.getElementById("startBtn").addEventListener("click", function () {
 });
 document.getElementById("againBtn").addEventListener("click", function () {
   audio(); startMusic(); playJingle();
+  var wasEndless = endless; endless = false;
   document.getElementById("endScreen").classList.add("hidden");
-  resetRun();
+  if (wasEndless) startEndless(); else resetRun();
   this.blur(); focusGame();
 });
 document.getElementById("storyBtn").addEventListener("click", function () {
   audio();
   document.getElementById("storyScreen").classList.add("hidden");
   this.blur();
-  if (stageIdx >= 2) endGame(true);
+  if (stageIdx >= 4) endGame(true);
   else { showIntro(stageIdx + 1); focusGame(); }
+});
+/* ---- movie scene controls: one tap advances, Skip jumps past ---- */
+document.getElementById("chapterScreen").addEventListener("click", function () { dismissChapter(); focusGame(); });
+document.getElementById("cutScreen").addEventListener("click", function () { advanceCutscene(); focusGame(); });
+document.getElementById("cutSkipBtn").addEventListener("click", function (e) { e.stopPropagation(); advanceCutscene(); this.blur(); focusGame(); });
+document.getElementById("dlgBox").addEventListener("click", function () { advanceDialogue(); focusGame(); });
+document.getElementById("dlgSkipBtn").addEventListener("click", function (e) { e.stopPropagation(); if (dlgLines) endDialogue(); this.blur(); focusGame(); });
+document.getElementById("endlessBtn").addEventListener("click", function () {
+  audio(); startMusic(); playJingle();
+  document.getElementById("titleScreen").classList.add("hidden");
+  document.getElementById("endScreen").classList.add("hidden");
+  startEndless();
+  window.__gameBooted = true;
+  this.blur(); focusGame();
 });
 document.getElementById("introBtn").addEventListener("click", function () {
   audio(); startMusic();
@@ -2240,13 +2882,19 @@ document.getElementById("introBtn").addEventListener("click", function () {
 });
 function quitToTitle() {
   paused = false; syncPauseBtn();
-  document.body.classList.remove("playing");
+  endless = false; pendingBoss = false; dlgLines = null;
+  if (cutTimer) { clearTimeout(cutTimer); cutTimer = null; }
+  if (chapterTimer) { clearTimeout(chapterTimer); chapterTimer = null; }
+  document.body.classList.remove("playing"); document.body.classList.remove("movie");
   document.getElementById("pauseScreen").classList.add("hidden");
   document.getElementById("helpScreen").classList.add("hidden");
   document.getElementById("endScreen").classList.add("hidden");
   document.getElementById("storyScreen").classList.add("hidden");
   document.getElementById("introScreen").classList.add("hidden");
-  boss = null; bossMode = false; enemies = []; ebullets = []; bullets = []; grenades = []; pickups = []; cages = []; popups = []; parts = [];
+  document.getElementById("chapterScreen").classList.add("hidden");
+  document.getElementById("cutScreen").classList.add("hidden");
+  document.getElementById("dialogueScreen").classList.add("hidden");
+  boss = null; bossMode = false; enemies = []; ebullets = []; bullets = []; grenades = []; pickups = []; cages = []; popups = []; parts = []; crates = [];
   allies = []; cam = 0; stageIdx = 0;
   P = newPlayer();
   saveBest();
@@ -2282,9 +2930,9 @@ document.getElementById("helpBackBtn").addEventListener("click", function () {
   this.blur(); focusGame();
 });
 function syncTopbar() {
-  var endish = state === "over" || state === "win";
-  document.getElementById("pauseBtn").style.display = endish ? "none" : "";
-  document.getElementById("fsBtn").style.display = endish ? "none" : "";
+  /* Sound, Pause and Full screen stay visible on EVERY screen — game over included */
+  document.getElementById("pauseBtn").style.display = "";
+  document.getElementById("fsBtn").style.display = "";
 }
 function syncMuteBtn() {
   var b = document.getElementById("muteBtn");
