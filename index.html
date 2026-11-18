@@ -200,6 +200,44 @@
   #teamStrip img { width: 62px; height: 65px; object-fit: cover; object-position: top center; border-radius: 10px; border: 2px solid #4a5590; display: block; background: #2a3565; }
   #teamStrip figcaption { font-size: 9.5px; font-weight: 800; color: #aab4e8; margin-top: 3px; line-height: 1.25; }
   #endRank { font-family: "Bungee", sans-serif; font-size: clamp(15px, 2.8vw, 20px); color: #3ee6c4; margin: 0; }
+  /* ---------- leaderboard ---------- */
+  #titleScreen { overflow-y: auto; }
+  #titleScreen h1 { font-size: clamp(34px, 5.8vw, 60px); }
+  .hero-dili { width: clamp(96px, 14vw, 140px); }
+  #endScreen { overflow-y: auto; justify-content: flex-start; }
+  .lb-panel {
+    width: min(100%, 540px); background: rgba(13,18,42,.92); border: 2px solid #3a4a8f; border-radius: 14px;
+    padding: 10px 14px 12px; text-align: left; box-shadow: 0 14px 34px rgba(0,0,0,.45);
+  }
+  .lb-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
+  .lb-head .lb-title { font-family: "Bungee", sans-serif; font-size: 15px; color: #ffd23e; letter-spacing: .5px; }
+  .lb-refresh {
+    border: 1.5px solid #4a5590; background: #161c3a; color: #dfe5ff; border-radius: 8px;
+    font: inherit; font-weight: 800; font-size: 12px; padding: 4px 10px; cursor: pointer; min-height: 30px;
+  }
+  .lb-refresh:hover { border-color: #ffd23e; color: #ffd23e; }
+  .lb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 20px; }
+  .lb-row { display: flex; align-items: baseline; gap: 8px; font-size: 13px; font-weight: 800; color: #e8ecff; padding: 2px 0; border-bottom: 1px solid rgba(74,85,144,.35); }
+  .lb-row .lb-rank { color: #3ee6c4; min-width: 22px; font-weight: 900; }
+  .lb-row .lb-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .lb-row .lb-score { color: #ffd23e; font-weight: 900; }
+  .lb-note { margin: 4px 0; font-size: 12.5px; font-weight: 700; color: #aab4e8; line-height: 1.45; }
+  .lb-form { margin-top: 8px; border-top: 1px solid rgba(74,85,144,.5); padding-top: 8px; }
+  .lb-form label { display: block; font-size: 13px; font-weight: 800; color: #e8ecff; margin-bottom: 6px; text-align: left; }
+  .lb-form-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  #lbNameInput {
+    flex: 1 1 150px; min-height: 42px; border-radius: 9px; border: 2px solid #4a5590;
+    background: #0d1330; color: #fff; font: inherit; font-weight: 800; font-size: 15px; padding: 8px 12px;
+  }
+  #lbNameInput:focus { outline: 3px solid #ffd23e; outline-offset: 1px; }
+  #lbSubmitBtn {
+    border: 0; cursor: pointer; min-height: 42px; padding: 8px 18px; border-radius: 9px;
+    font-family: "Bungee", "Nunito", sans-serif; font-size: 14px; color: #231303;
+    background: linear-gradient(180deg, #ffd23e, #ff9d2e); box-shadow: 0 4px 0 #b95d12;
+  }
+  #lbSubmitBtn:disabled { opacity: .6; cursor: wait; }
+  #lbDoneMsg { color: #3ee6c4; font-weight: 900; font-size: 13.5px; margin: 6px 0 0; }
+  @media (max-width: 640px) { .lb-grid { grid-template-columns: 1fr; } .lb-panel { padding: 8px 10px 10px; } }
   /* ---------- pause / help menus ---------- */
   #pauseScreen, #helpScreen { background: rgba(7,9,22,.8); z-index: 6; padding: 22px 26px; }
   .menutitle { margin: 0 0 6px; font-family: "Bungee", sans-serif; font-weight: 400; font-size: clamp(24px, 4.4vw, 38px); color: #ffd23e; text-shadow: 0 3px 0 #7a1f3d; }
@@ -442,6 +480,10 @@
       <p class="hintline"><span><b>◀ ▶</b> Move</span><span class="dot">•</span><span><b>Z</b> Shoot</span><span class="dot">•</span><span><b>X</b> Jump</span></p>
       <p class="bestline" id="titleBest"></p>
       <button class="ghostbtn" id="titleHelpBtn">? &nbsp;How to Play</button>
+      <div class="lb-panel" id="titleLbPanel">
+        <div class="lb-head"><span class="lb-title">🏆 Top Scores</span><button type="button" class="lb-refresh" id="titleLbRefresh">Refresh</button></div>
+        <div id="titleLbList"><p class="lb-note">Loading scores...</p></div>
+      </div>
       </div>
     </div>
 
@@ -499,6 +541,19 @@
       <p class="quip" id="endQuip"></p>
       <div id="endStats"></div>
       <div id="teamStrip" aria-label="The Dlicom team"></div>
+      <div class="lb-panel" id="endLbPanel">
+        <div class="lb-head"><span class="lb-title">🏆 Top Scores</span><button type="button" class="lb-refresh" id="endLbRefresh">Refresh</button></div>
+        <div id="endLbList"><p class="lb-note">Loading scores...</p></div>
+        <form class="lb-form hidden" id="lbForm">
+          <label for="lbNameInput">Your score made the board! Enter your name to post it:</label>
+          <div class="lb-form-row">
+            <input id="lbNameInput" type="text" maxlength="12" autocomplete="off" placeholder="Your name" />
+            <button type="submit" id="lbSubmitBtn">Submit Score</button>
+          </div>
+          <p class="lb-note" id="lbSubmitMsg"></p>
+        </form>
+        <p id="lbDoneMsg" class="hidden"></p>
+      </div>
       <button class="bigbtn" id="againBtn">↻ &nbsp;Play Again</button>
       <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
         <button class="ghostbtn" id="endHelpBtn">? &nbsp;How to Play</button>
@@ -771,6 +826,9 @@ function noteKey(name) {
 var endTime = 0; /* when the end screen appeared, restart keys are ignored briefly */
 document.addEventListener("keydown", function (e) {
   audio(); /* a key press is a user gesture: unlock + resume sound */
+  /* typing a leaderboard name must never fire game keys or restart the run */
+  var tgt0 = e.target;
+  if (tgt0 && (tgt0.tagName === "INPUT" || tgt0.tagName === "TEXTAREA" || tgt0.isContentEditable)) return;
   /* a focused button must never swallow Space/Enter as a "click" mid-game */
   var ae = document.activeElement;
   if (ae && ae.tagName === "BUTTON" && ae.id !== "startBtn" && ae.id !== "againBtn") ae.blur();
@@ -817,7 +875,11 @@ window.addEventListener("blur", function () {
 document.addEventListener("visibilitychange", function () {
   if (document.hidden) for (var k in keys) keys[k] = false;
 });
-document.addEventListener("pointerdown", function () { focusGame(); });
+document.addEventListener("pointerdown", function (e) {
+  var tgt1 = e.target;
+  if (tgt1 && (tgt1.tagName === "INPUT" || tgt1.tagName === "TEXTAREA")) return; /* keep focus in the leaderboard name field */
+  focusGame();
+});
 /* touch + mouse via Pointer Events (one path, no double-firing) */
 if ("ontouchstart" in window || navigator.maxTouchPoints > 0) document.body.classList.add("touch");
 Array.prototype.forEach.call(document.querySelectorAll(".tbtn"), function (el) {
@@ -1319,6 +1381,141 @@ function syncTitleBest() {
   var el = document.getElementById("titleBest");
   if (el) el.textContent = hiScore > 0 ? "🏆 Best Score: " + hiScore : "";
 }
+/* ---------------- LEADERBOARD (online, via /api/leaderboard) ----------------
+   The public game posts scores to a small backend on the same origin
+   (a Vercel serverless function backed by Vercel KV). If that backend
+   is not set up yet, or the fetch fails, the game shows only the local
+   best score stored on this device. No fake scores, ever. */
+var lbScores = [];
+var lbState = "unknown"; /* unknown | ready | offline */
+var lbSubmitted = false;
+var lbIsNewBest = false;
+function lbStoredName() {
+  try { return (localStorage.getItem("diliStreakLbName") || "").slice(0, 12) || "Dili"; }
+  catch (e) { return "Dili"; }
+}
+function lbNote(text) {
+  var p = document.createElement("p");
+  p.className = "lb-note"; p.textContent = text;
+  return p;
+}
+function lbRenderInto(el) {
+  if (!el) return;
+  el.innerHTML = "";
+  if (lbState === "unknown") { el.appendChild(lbNote("Loading scores...")); return; }
+  if (lbState === "offline") {
+    el.appendChild(lbNote("Online leaderboard is not set up yet."));
+    el.appendChild(lbNote(hiScore > 0 ? "Your best on this device: " + hiScore : "Play a run to set your best score on this device."));
+    return;
+  }
+  if (!lbScores.length) {
+    el.appendChild(lbNote("No online scores yet. Be the first to post one!"));
+    if (hiScore > 0) el.appendChild(lbNote("Your best on this device: " + hiScore));
+    return;
+  }
+  var grid = document.createElement("div");
+  grid.className = "lb-grid";
+  lbScores.forEach(function (s, i) {
+    var row = document.createElement("div");
+    row.className = "lb-row";
+    var rank = document.createElement("span"); rank.className = "lb-rank"; rank.textContent = (i + 1) + ".";
+    var nm = document.createElement("span"); nm.className = "lb-name"; nm.textContent = s.name;
+    var sc = document.createElement("span"); sc.className = "lb-score"; sc.textContent = s.score;
+    row.appendChild(rank); row.appendChild(nm); row.appendChild(sc);
+    grid.appendChild(row);
+  });
+  el.appendChild(grid);
+}
+function renderLeaderboards() {
+  lbRenderInto(document.getElementById("titleLbList"));
+  lbRenderInto(document.getElementById("endLbList"));
+}
+function lbQualifiesNow() {
+  if (lbState !== "ready" || score <= 0) return false;
+  if (lbScores.length < 10) return true;
+  return score >= lbScores[lbScores.length - 1].score;
+}
+function updateEndLbForm() {
+  var form = document.getElementById("lbForm");
+  if (!form) return;
+  var show = (state === "over" || state === "win") && lbState === "ready" && !lbSubmitted && score > 0 && (lbIsNewBest || lbQualifiesNow());
+  form.classList.toggle("hidden", !show);
+  if (show) {
+    var inp = document.getElementById("lbNameInput");
+    if (inp && !inp.value) inp.value = lbStoredName();
+  }
+}
+function fetchLeaderboard() {
+  if (typeof fetch !== "function") { lbState = "offline"; lbScores = []; renderLeaderboards(); updateEndLbForm(); return Promise.resolve(false); }
+  var opts = { method: "GET", headers: { "Accept": "application/json" } };
+  var ctrl = null, timer = null;
+  if (window.AbortController) {
+    try {
+      ctrl = new AbortController(); opts.signal = ctrl.signal;
+      timer = setTimeout(function () { try { ctrl.abort(); } catch (e) {} }, 4500);
+    } catch (e) { ctrl = null; }
+  }
+  return fetch("/api/leaderboard", opts).then(function (r) {
+    if (timer) clearTimeout(timer);
+    if (!r.ok) throw new Error("bad status");
+    return r.json();
+  }).then(function (data) {
+    if (!data || !Array.isArray(data.scores)) throw new Error("bad data");
+    if (data.configured === false) { lbState = "offline"; lbScores = []; }
+    else {
+      lbState = "ready";
+      lbScores = data.scores.filter(function (s) {
+        return s && typeof s.name === "string" && isFinite(Number(s.score));
+      }).map(function (s) {
+        return { name: s.name.slice(0, 12), score: Number(s.score) };
+      }).slice(0, 10);
+    }
+    renderLeaderboards(); updateEndLbForm();
+    return true;
+  }).catch(function () {
+    if (timer) clearTimeout(timer);
+    lbState = "offline"; lbScores = [];
+    renderLeaderboards(); updateEndLbForm();
+    return false;
+  });
+}
+function submitLeaderboardScore() {
+  var inp = document.getElementById("lbNameInput");
+  var btn = document.getElementById("lbSubmitBtn");
+  var msg = document.getElementById("lbSubmitMsg");
+  var name = ((inp && inp.value) || "").trim().slice(0, 12) || "Dili";
+  if (inp) inp.value = name;
+  try { localStorage.setItem("diliStreakLbName", name); } catch (e) {}
+  if (btn) { btn.disabled = true; btn.textContent = "Submitting..."; }
+  if (msg) msg.textContent = "";
+  function fail(text) {
+    if (btn) { btn.disabled = false; btn.textContent = "Submit Score"; }
+    if (msg) msg.textContent = text;
+  }
+  if (typeof fetch !== "function") { fail("Online leaderboard is not available right now. Your best score is saved on this device."); return; }
+  fetch("/api/leaderboard", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Accept": "application/json" },
+    body: JSON.stringify({ name: name, score: score })
+  }).then(function (r) { return r.json(); }).then(function (data) {
+    if (data && data.ok) {
+      lbSubmitted = true;
+      if (btn) { btn.disabled = false; btn.textContent = "Submit Score"; }
+      var form = document.getElementById("lbForm");
+      if (form) form.classList.add("hidden");
+      var done = document.getElementById("lbDoneMsg");
+      if (done) {
+        done.textContent = "Score posted for " + name + (data.rank ? ", rank #" + data.rank + "!" : "!");
+        done.classList.remove("hidden");
+      }
+      fetchLeaderboard();
+    } else {
+      fail((data && data.error) ? String(data.error) : "Could not post your score. Please try again.");
+    }
+  }).catch(function () {
+    fail("Online leaderboard is not available right now. Your best score is saved on this device.");
+  });
+}
 /* Dili's real hitbox, crouching shrinks it low, so straight enemy shots sail overhead. */
 function playerBox() {
   if (P.crouch) return { x: P.x + 3, y: P.y + 27, w: 24, h: 25 };
@@ -1531,6 +1728,10 @@ function endGame(win) {
   paused = false; syncPauseBtn();
   document.getElementById("pauseScreen").classList.add("hidden");
   if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+  lbIsNewBest = score > hiScore; lbSubmitted = false;
+  var lbForm0 = document.getElementById("lbForm"); if (lbForm0) lbForm0.classList.add("hidden");
+  var lbMsg0 = document.getElementById("lbSubmitMsg"); if (lbMsg0) lbMsg0.textContent = "";
+  var lbDone0 = document.getElementById("lbDoneMsg"); if (lbDone0) { lbDone0.textContent = ""; lbDone0.classList.add("hidden"); }
   saveBest();
   var t = document.getElementById("endTitle"), q = document.getElementById("endQuip"), s = document.getElementById("endStats");
   t.textContent = win ? "🎬 THE END, VAULT RECOVERED!" : (endless ? "♾️ Endless Run Over!" : "💥 DILI Is Down!");
@@ -1560,6 +1761,7 @@ function endGame(win) {
   document.getElementById("storyScreen").classList.add("hidden");
   document.getElementById("endScreen").classList.remove("hidden");
   syncTopbar();
+  fetchLeaderboard();
   if (win) { SFX.rescue(); }
 }
 
@@ -3161,6 +3363,10 @@ P = newPlayer();
 try { hiScore = parseInt(localStorage.getItem("diliStreakBest") || "0", 10) || 0; } catch (e) { hiScore = 0; }
 try { muted = localStorage.getItem("diliStreakMuted") === "1"; } catch (e) {}
 syncMuteBtn(); syncTitleBest();
+renderLeaderboards(); fetchLeaderboard();
+document.getElementById("lbForm").addEventListener("submit", function (e) { e.preventDefault(); submitLeaderboardScore(); });
+document.getElementById("titleLbRefresh").addEventListener("click", function () { fetchLeaderboard(); this.blur(); });
+document.getElementById("endLbRefresh").addEventListener("click", function () { fetchLeaderboard(); this.blur(); });
 document.getElementById("startBtn").addEventListener("click", function () {
   audio(); startMusic(); playJingle();
   endless = false;
@@ -3228,7 +3434,7 @@ function quitToTitle() {
   saveBest();
   state = "title";
   document.getElementById("titleScreen").classList.remove("hidden");
-  syncTopbar(); focusGame();
+  syncTopbar(); fetchLeaderboard(); focusGame();
 }
 document.getElementById("quitBtn").addEventListener("click", function () { quitToTitle(); this.blur(); });
 document.getElementById("endQuitBtn").addEventListener("click", function () { quitToTitle(); this.blur(); });
@@ -3320,6 +3526,8 @@ fsBtn.addEventListener("click", function () { toggleFullscreen(); this.blur(); }
 document.addEventListener("fullscreenchange", applyFsClass);
 document.addEventListener("webkitfullscreenchange", applyFsClass);
 document.addEventListener("keydown", function (e) {
+  var tgt2 = e.target;
+  if (tgt2 && (tgt2.tagName === "INPUT" || tgt2.tagName === "TEXTAREA" || tgt2.isContentEditable)) return;
   if (e.code === "KeyP") togglePause();
   if (e.code === "Escape") { if (pseudoFs) setPseudoFs(false); else togglePause(); }
   if (e.code === "KeyM") toggleMute();
