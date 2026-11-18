@@ -607,6 +607,8 @@ function hit(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.
 
 /* ---------------- AUDIO (tiny synth, no files) ---------------- */
 var AC = null, masterGain = null, muted = false, musicTimer = null, musicStep = 0;
+var musicDuckUntil = 0; /* while a pickup sound plays, the music dips so the pickup cuts through */
+function duckMusic(ms) { musicDuckUntil = Math.max(musicDuckUntil, performance.now() + (ms || 800)); }
 function audio() {
   if (!AC) {
     try {
@@ -645,48 +647,50 @@ var SFX = {
   pop:    function () { beep(rnd(300, 420), 0.07, "square", 0.15, 90); noise(0.06, 0.17, 2000); },
   hurt:   function () { beep(160, 0.18, "sawtooth", 0.22, 60); },
   jump:   function () { beep(280, 0.12, "square", 0.1, 620); },
-  pickup: function () { beep(660, 0.08, "square", 0.15); setTimeout(function(){ beep(990, 0.12, "square", 0.15); }, 70); },
+  pickup: function () { duckMusic(700); beep(660, 0.08, "square", 0.28); setTimeout(function(){ beep(990, 0.12, "square", 0.28); }, 70); },
   /* ---- distinct PICKUP sounds: one voice per power-up, so you know what you grabbed by ear.
-     All peaks stay at or below the boss-hit sounds (big/boom). ---- */
-  pkRocket: function () { /* the big one: rising whoosh, then a boom, then a two-note fanfare */
-    beep(110, 0.45, "sawtooth", 0.13, 950); noise(0.4, 0.1, 500);
-    setTimeout(function(){ noise(0.32, 0.26, 480); beep(88, 0.3, "sine", 0.24, 30); }, 400);
-    setTimeout(function(){ beep(523, 0.11, "square", 0.12); }, 460);
-    setTimeout(function(){ beep(784, 0.18, "square", 0.12); }, 550);
+     Pickup peaks sit at 0.25 to 0.35, clearly ABOVE the music (bass 0.19, lead 0.045),
+     and every pickup ducks the music briefly so it is heard, not masked. ---- */
+  pkRocket: function () { /* the big one, and the loudest pickup of all: rising whoosh, then a boom, then a two-note fanfare */
+    beep(110, 0.45, "sawtooth", 0.30, 950); noise(0.4, 0.22, 500);
+    setTimeout(function(){ noise(0.32, 0.35, 480); beep(88, 0.3, "sine", 0.35, 30); }, 400);
+    setTimeout(function(){ beep(523, 0.11, "square", 0.30); }, 460);
+    setTimeout(function(){ beep(784, 0.18, "square", 0.32); }, 550);
   },
   pkMg: function () { /* fast rat-a-tat burst */
-    for (var i = 0; i < 5; i++) (function (k) { setTimeout(function(){ beep(rnd(520, 720), 0.04, "square", 0.12, 170); noise(0.03, 0.09, 2600); }, k * 55); })(i);
+    for (var i = 0; i < 5; i++) (function (k) { setTimeout(function(){ beep(rnd(520, 720), 0.04, "square", 0.28, 170); noise(0.03, 0.20, 2600); }, k * 55); })(i);
   },
   pkSpread: function () { /* triple pew-pew-pew, one per barrel */
-    for (var i = 0; i < 3; i++) (function (k) { setTimeout(function(){ beep(940 - k * 170, 0.07, "square", 0.12, 280); }, k * 70); })(i);
+    for (var i = 0; i < 3; i++) (function (k) { setTimeout(function(){ beep(940 - k * 170, 0.07, "square", 0.28, 280); }, k * 70); })(i);
   },
   pkShield: function () { /* bright shimmering chime, notes ring over each other */
-    [1046, 1318, 1568, 2093].forEach(function (f, i) { setTimeout(function(){ beep(f, 0.26, "sine", 0.11); }, i * 55); });
+    [1046, 1318, 1568, 2093].forEach(function (f, i) { setTimeout(function(){ beep(f, 0.26, "sine", 0.27); }, i * 55); });
   },
   pkDouble: function () { /* cheerful coin arpeggio for ×2 Coins */
-    [988, 1175, 1318, 1568, 1975].forEach(function (f, i) { setTimeout(function(){ beep(f, 0.1, "square", 0.11); }, i * 55); });
+    [988, 1175, 1318, 1568, 1975].forEach(function (f, i) { setTimeout(function(){ beep(f, 0.1, "square", 0.27); }, i * 55); });
   },
   pkMagnet: function () { /* magnetic zap-pull: sweep dives in, then snaps back up */
-    beep(1500, 0.26, "sawtooth", 0.09, 200); noise(0.1, 0.07, 3200);
-    setTimeout(function(){ beep(200, 0.16, "sawtooth", 0.1, 1700); }, 230);
+    beep(1500, 0.26, "sawtooth", 0.26, 200); noise(0.1, 0.18, 3200);
+    setTimeout(function(){ beep(200, 0.16, "sawtooth", 0.27, 1700); }, 230);
   },
   pkHeart: function () { /* warm two-note lift for a heart / extra life */
-    beep(392, 0.17, "triangle", 0.17); setTimeout(function(){ beep(587, 0.26, "triangle", 0.17); }, 110);
+    duckMusic(700); beep(392, 0.17, "triangle", 0.30); setTimeout(function(){ beep(587, 0.26, "triangle", 0.30); }, 110);
   },
   pkMedkit: function () { /* soft healing rise */
-    [523, 659, 784].forEach(function (f, i) { setTimeout(function(){ beep(f, 0.16, "sine", 0.11); }, i * 80); });
+    [523, 659, 784].forEach(function (f, i) { setTimeout(function(){ beep(f, 0.16, "sine", 0.27); }, i * 80); });
   },
   pkGrenade: function () { /* short click-clack of a fresh pin and shell */
-    noise(0.03, 0.15, 3000); beep(320, 0.03, "square", 0.1, 150);
-    setTimeout(function(){ noise(0.03, 0.15, 2400); beep(210, 0.05, "square", 0.12, 110); }, 95);
+    noise(0.03, 0.28, 3000); beep(320, 0.03, "square", 0.25, 150);
+    setTimeout(function(){ noise(0.03, 0.28, 2400); beep(210, 0.05, "square", 0.27, 110); }, 95);
   },
-  coin:   function () { beep(1320, 0.07, "square", 0.14); setTimeout(function(){ beep(1760, 0.14, "square", 0.14); }, 60); },
+  coin:   function () { duckMusic(600); beep(1320, 0.07, "square", 0.27); setTimeout(function(){ beep(1760, 0.14, "square", 0.27); }, 60); },
   roar:   function () { beep(70, 0.5, "sawtooth", 0.26, 46); noise(0.4, 0.2, 300); setTimeout(function(){ beep(58, 0.4, "sawtooth", 0.22, 40); }, 130); },
   rescue: function () { [523, 659, 784, 1046].forEach(function (f, i) { setTimeout(function(){ beep(f, 0.12, "square", 0.15); }, i * 80); }); },
   streak: function () { beep(1180, 0.09, "square", 0.14, 1600); }
 };
 /* Play the pickup sound that matches what Dili just collected. */
 function pickupSfx(kind) {
+  duckMusic(kind === "rocket" ? 1500 : 850); /* the music steps aside so the pickup is unmissable */
   var fn = { rocket: SFX.pkRocket, mg: SFX.pkMg, spread: SFX.pkSpread, shield: SFX.pkShield,
              double: SFX.pkDouble, magnet: SFX.pkMagnet, heart: SFX.pkHeart,
              grenade: SFX.pkGrenade, medkit: SFX.pkMedkit }[kind];
@@ -700,12 +704,13 @@ var BASS = [110, 0, 110, 0, 130.8, 0, 110, 0, 98, 0, 98, 0, 146.8, 0, 164.8, 0];
 var LEAD = [440, 0, 523, 587, 0, 523, 440, 0, 392, 0, 440, 494, 523, 0, 587, 0];
 function musicTick() {
   if (muted || !AC || AC.state !== "running" || state !== "play" || paused) return;
+  var duck = performance.now() < musicDuckUntil ? 0.22 : 1; /* pickup playing: music dips to about a fifth */
   var f = BASS[musicStep % BASS.length];
-  if (f) beep(f, 0.15, "triangle", 0.19);
+  if (f) beep(f, 0.15, "triangle", 0.19 * duck);
   var l = LEAD[musicStep % LEAD.length];
-  if (l) beep(l, 0.11, "square", 0.045);
-  if (musicStep % 2 === 0) noise(0.03, 0.04, 6000);
-  if (musicStep % 8 === 4) beep(392, 0.1, "square", 0.04);
+  if (l) beep(l, 0.11, "square", 0.045 * duck);
+  if (musicStep % 2 === 0) noise(0.03, 0.04 * duck, 6000);
+  if (musicStep % 8 === 4) beep(392, 0.1, "square", 0.04 * duck);
   musicStep++;
 }
 function startMusic() { if (!musicTimer) musicTimer = setInterval(musicTick, 150); }
@@ -897,6 +902,7 @@ var stageIdx = 0, stageTime = 0, clearTimer = 0;
 var bullets = [], ebullets = [], grenades = [], enemies = [], parts = [], popups = [], pickups = [], shellsFx = [], cages = [], crates = [];
 var popupQueue = []; /* floating texts waiting for a free spot, popups never stack on each other */
 var graceT = 0; /* Stage 1 warm-up: frames at stage start where goons hold their fire */
+var earlyRocketStage = 3; /* Stage 1 only: 1 = first Rocket Launcher dropped, 2 = fallback dropped, 3 = done */
 var introSeen = {}; /* enemy types already introduced with a name label this stage */
 var boss = null, bossMode = false;
 var allies = [], checkpointX = 90, stageAllyDone = false, tauntCdG = 0;
@@ -1331,8 +1337,16 @@ function loadStage(i) {
   allies.forEach(function (a, ai2) { a.x = 40 - ai2 * 46; a.y = GROUND - 44; a.fireCd = 50 + ai2 * 14; });
   /* a DENSE trail of coins through the stage, something shiny in every stretch */
   for (var cxx = 560; cxx < STAGES[i].len - 420; cxx += 330) dropPickup(cxx + irnd(-40, 40), GROUND - 72, coinKind());
-  /* smashable crates hide power-ups */
-  for (var crx = 900; crx < STAGES[i].len - 500; crx += 1050) crates.push({ x: crx + irnd(-60, 60), y: GROUND - 34, w: 34, h: 34, hp: 2, flash: 0 });
+  /* GUARANTEED first power-up: on Stage 1 a Rocket Launcher waits just ahead of
+     the spawn point, so the player collects a power-up and hears its pickup
+     sound within the first seconds of play, no luck involved. */
+  earlyRocketStage = (i === 0 && !endless) ? 1 : 3;
+  if (i === 0 && !endless) {
+    dropPickup(430, GROUND - 72, "rocket");
+    popup(443, GROUND - 118, "Rocket Launcher ahead! Grab it! 🚀", "#3ee6c4", false, 170);
+  }
+  /* smashable crates hide power-ups, and there are more of them now */
+  for (var crx = 900; crx < STAGES[i].len - 500; crx += 780) crates.push({ x: crx + irnd(-60, 60), y: GROUND - 34, w: 34, h: 34, hp: 2, flash: 0 });
   if (i > 0 && !endless && P.lives < 5) { P.lives++; popup(W / 2, 150, "Stage bonus: +1 Life ❤", "#7dff8a", true); }
   if (i === 0 && !endless) popup(W / 2, 198, "Warm-up: the first goons shoot slow, find your range! 🎯", "#8fb8ff", true);
   paused = false; syncPauseBtn(); syncTopbar();
@@ -1590,12 +1604,12 @@ function killEnemy(e, idx) {
   if (P.streak === 5 || P.streak === 10 || P.streak === 15) { popup(W / 2, 120, "🔥 COMBO ×" + streakMult() + "! 🔥", "#ff5c5c", true); SFX.streak(); }
   explosion(e.x + e.w / 2, e.y + e.h / 2, e.type === "turret" || e.type === "brute");
   var dropRoll = Math.random();
-  if (dropRoll < 0.28) dropPickup(e.x + 4, e.y + 10, coinKind());
-  else if (dropRoll < 0.36) { /* power-ups: shield, double coins, magnet, weapons */
-    var pool = ["shield", "double", "magnet", "spread", "mg", "rocket"];
+  if (dropRoll < 0.20) dropPickup(e.x + 4, e.y + 10, coinKind());
+  else if (dropRoll < 0.52) { /* power-ups, now a common drop, about 1 in 3 kills: shield, double coins, magnet, weapons */
+    var pool = ["shield", "double", "magnet", "spread", "mg", "rocket", "spread", "mg", "rocket"];
     dropPickup(e.x + 4, e.y + 10, pool[irnd(0, pool.length - 1)]);
   }
-  else if (e.type !== "turret" && dropRoll < 0.47) {
+  else if (e.type !== "turret" && dropRoll < 0.68) {
     var kind2 = Math.random();
     var dk = P.hp <= 2 ? (kind2 < 0.55 ? "medkit" : kind2 < 0.82 ? "grenade" : "heart")
                        : (kind2 < 0.34 ? "medkit" : kind2 < 0.67 ? "grenade" : "heart");
@@ -1637,6 +1651,21 @@ function update() {
   stageTime++;
   pollPad();
   var st = STAGES[stageIdx];
+  /* Stage 1 Rocket Launcher guarantee, second and third chances: if the first
+     launcher was missed, another one drops just ahead of Dili at about 10
+     seconds and again at about 18 seconds, so a Rocket Launcher pickup always
+     happens inside the first 20 seconds of Stage 1. */
+  if (earlyRocketStage === 1 && stageTime >= 600) {
+    var hasRocket1 = P.weapon === "rocket";
+    for (var er1 = 0; er1 < pickups.length; er1++) if (pickups[er1].kind === "rocket") hasRocket1 = true;
+    if (hasRocket1) earlyRocketStage = 3;
+    else { dropPickup(clamp(P.x + 230, 30, st.len - 60), GROUND - 72, "rocket"); earlyRocketStage = 2; }
+  } else if (earlyRocketStage === 2 && stageTime >= 1080) {
+    var hasRocket2 = P.weapon === "rocket";
+    for (var er2 = 0; er2 < pickups.length; er2++) if (pickups[er2].kind === "rocket") hasRocket2 = true;
+    earlyRocketStage = 3;
+    if (!hasRocket2) dropPickup(clamp(P.x + 200, 30, st.len - 60), GROUND - 72, "rocket");
+  }
 
   /* spawns */
   var list = SPAWNS[stageIdx];
@@ -1826,6 +1855,8 @@ function update() {
           burst(cr.x + 17, cr.y + 17, 14, ["#d9a05a", "#ffd23e"], 3.6, 22, 0.15); SFX.pop();
           var cpool = ["shield", "double", "magnet", "spread", "mg", "rocket", "medkit", "grenade", "heart"];
           dropPickup(cr.x + 4, cr.y - 6, cpool[irnd(0, cpool.length - 1)]);
+          dropPickup(cr.x + 24, cr.y - 6, coinKind()); /* every crate also spills a coin */
+          if (Math.random() < 0.4) dropPickup(cr.x + 14, cr.y - 26, cpool[irnd(0, cpool.length - 1)]); /* and often a second power-up */
           popup(cr.x + 17, cr.y - 12, "Crate smashed! 📦", "#ffd23e");
           crates.splice(cri, 1);
         }
@@ -2054,7 +2085,7 @@ function update() {
       pickupSfx(pk.kind); score += 50;
       burst(pk.x + 13, pk.y + 13, 10, ["#ffffff", "#ffd23e"], 2.6, 20, 0.05);
       pickups.splice(pi, 1);
-    } else if (pk.t > 60 * 14) pickups.splice(pi, 1);
+    } else if (pk.t > 60 * 30) pickups.splice(pi, 1); /* pickups linger about 30 seconds, plenty of time to grab them */
   }
   for (var ci2 = 0; ci2 < cages.length; ci2++) if (cages[ci2].flash > 0) cages[ci2].flash--;
 
